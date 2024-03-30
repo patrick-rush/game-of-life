@@ -1,13 +1,12 @@
 import { CommonModule, NgFor } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { FillCellPipe } from '../fill-cell.pipe';
 
 type Binary = 0 | 1;
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, FillCellPipe, CommonModule],
+  imports: [NgFor, CommonModule],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
 })
