@@ -55,6 +55,19 @@ export class GameComponent {
     return [newBoard, newBoardMap];
   }
 
+  randomizeBoard() {
+    this.resetGame();
+    const boundary = Math.random() * (0.95 - 0.7) + 0.7;
+    this.board.forEach((row) => {
+      row.forEach((cell) => {
+        if (Math.random() > boundary) {
+          cell[0] = true;
+          this.livingCells++;
+        }
+      });
+    });
+  }
+
   startGame() {
     this.intervalId = window.setInterval(this.runGame, this.interval);
     this.running = true;
@@ -114,6 +127,8 @@ export class GameComponent {
     const cell = this.boardMap.get(row)?.get(col);
     if (cell === undefined) return;
     cell[0] = !cell[0];
+    if (cell[0]) this.livingCells++;
+    else this.livingCells--;
     this.ref.detectChanges();
   }
 

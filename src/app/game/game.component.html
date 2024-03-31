@@ -7,6 +7,7 @@
       <button (click)="startGame()">Start Game</button>
       }
       <button (click)="resetGame()">Reset Game</button>
+      <button (click)="randomizeBoard()">Random Board</button>
     </div>
     <div class="details">
       <span>Iteration: {{ this.iteration.toString().padStart(6, "0") }}</span>
@@ -19,20 +20,27 @@
     <div class="board">
       <div *ngFor="let row of board; let rowIndex = index">
         <div *ngFor="let cell of row; let columnIndex = index">
+          <!-- datasets added for future event use -->
           <div
             *ngIf="!boardMap.get(rowIndex)?.get(columnIndex)?.[0]"
             class="cell light"
+            [attr.data-row]="rowIndex"
+            [attr.data-col]="columnIndex"
             (click)="flipCell(rowIndex, columnIndex)"
           ></div>
           <div
             *ngIf="boardMap.get(rowIndex)?.get(columnIndex)?.[0] && !running"
             class="cell dark"
+            [attr.data-row]="rowIndex"
+            [attr.data-col]="columnIndex"
             (click)="flipCell(rowIndex, columnIndex)"
           ></div>
           <div
             *ngIf="boardMap.get(rowIndex)?.get(columnIndex)?.[0] && running"
             class="cell"
             [ngStyle]="{ 'background-color': livingCells | colorCell }"
+            [attr.data-row]="rowIndex"
+            [attr.data-col]="columnIndex"
             (click)="flipCell(rowIndex, columnIndex)"
           ></div>
         </div>
