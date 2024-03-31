@@ -1,69 +1,43 @@
-<style>
-  .game {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  button {
-    height: 40px;
-    width: auto;
-    padding: 10px 20px;
-    margin: 0 10px;
-    font-size: 16px;
-    background-color: #ffffff;
-    border: 1px solid #000000;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 2%;
-    margin-bottom: 2%;
-  }
-
-  .board {
-    display: flex;
-    width: auto;
-    height: auto;
-    border: 1px solid #000000;
-  }
-
-  .cell {
-    width: 13px;
-    height: 13px;
-    border: 0.5px solid #e7e7e7;
-  }
-
-  .dark {
-    background-color: #000000;
-  }
-
-  .light {
-    background-color: #ffffff;
-  }
-</style>
-
 <div class="game">
-  <div class="controls">
-    <button (click)="startGame()">Start Game</button>
-    <button (click)="stopGame()">Stop Game</button>
-    <button (click)="resetGame()">Reset Game</button>
+  <div>
+    <div class="controls">
+      @if (running) {
+      <button (click)="stopGame()">Stop Game</button>
+      } @else {
+      <button (click)="startGame()">Start Game</button>
+      }
+      <button (click)="resetGame()">Reset Game</button>
+    </div>
+    <div class="details">
+      <span>Iteration: {{ this.iteration.toString().padStart(6, "0") }}</span>
+      <span
+        >Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span
+      >
+    </div>
   </div>
-  <div class="board">
-    <div *ngFor="let row of board; let rowIndex = index">
-      <div *ngFor="let cell of row; let columnIndex = index">
-        <div
-          class="cell"
-          [ngClass]="{ light: board[rowIndex][columnIndex][0] }"
-          [ngClass]="{ dark: !board[rowIndex][columnIndex][0] }"
-          (click)="flipCell(rowIndex, columnIndex)"
-        ></div>
+  <div>
+    <div class="board">
+      <div *ngFor="let row of board; let rowIndex = index">
+        <div *ngFor="let cell of row; let columnIndex = index">
+          <div
+            *ngIf="!boardMap.get(rowIndex)?.get(columnIndex)?.[0]"
+            class="cell light"
+            (click)="flipCell(rowIndex, columnIndex)"
+          ></div>
+          <div
+            *ngIf="boardMap.get(rowIndex)?.get(columnIndex)?.[0] && !running"
+            class="cell dark"
+            (click)="flipCell(rowIndex, columnIndex)"
+          ></div>
+          <div
+            *ngIf="boardMap.get(rowIndex)?.get(columnIndex)?.[0] && running"
+            class="cell"
+            [ngStyle]="{ 'background-color': livingCells | colorCell }"
+            (click)="flipCell(rowIndex, columnIndex)"
+          ></div>
+        </div>
       </div>
     </div>
   </div>
+  <div></div>
 </div>

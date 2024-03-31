@@ -1,0 +1,15 @@
+:host {
+    font-family: "Fira Code", "Fira Mono", Consolas, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #171717;
+}

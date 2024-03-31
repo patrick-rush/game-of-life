@@ -1,78 +1,132 @@
-import { CommonModule, NgFor } from '@angular/common';
+import {
+  CommonModule,
+  NgFor,
+  NgIf,
+  NgStyle,
+  NgTemplateOutlet,
+} from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
-
-type Binary = 0 | 1;
+import { ColorCellPipe } from '../color-cell.pipe';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, CommonModule],
+  imports: [
+    ColorCellPipe,
+    CommonModule,
+    NgFor,
+    NgIf,
+    NgStyle,
+    NgTemplateOutlet,
+  ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
 })
 export class GameComponent {
   intervalId: number | null = null;
-  // board: Binary[][] = Array(60).fill(Array(60).fill(0));
-  board: [Boolean][][] = [];
-  boardMap: Map<number, Map<number, [Boolean]>> = new Map();
-  private readonly interval;
+  private readonly interval: number = 100;
+  private readonly boardSize: number = 55;
+  running: boolean = false;
+  iteration: number = 0;
+  livingCells: number = 0;
+  board: [boolean][][];
+  boardMap: Map<number, Map<number, [boolean]>>;
 
   constructor(private ref: ChangeDetectorRef) {
-    this.interval = 1000;
-    this.generateBoard();
+    const [newBoard, newBoardMap] = this.generateBoard();
+    this.board = newBoard;
+    this.boardMap = newBoardMap;
   }
 
-  generateBoard() {
-    for (let i = 0; i < 60; i++) {
-      const row: [Boolean][] = [];
-      const rowMap = new Map<number, [Boolean]>();
-      for (let j = 0; j < 60; j++) {
-        const cell: [Boolean] = [true];
+  generateBoard(): [[boolean][][], Map<number, Map<number, [boolean]>>] {
+    const newBoard: [boolean][][] = [];
+    const newBoardMap: Map<number, Map<number, [boolean]>> = new Map();
+    for (let i = 0; i < this.boardSize; i++) {
+      const row: [boolean][] = [];
+      const rowMap = new Map<number, [boolean]>();
+      for (let j = 0; j < this.boardSize; j++) {
+        const cell: [boolean] = [false];
         rowMap.set(j, cell);
         row.push(cell);
       }
-      this.boardMap.set(i, rowMap);
-      this.board.push(row);
+      newBoardMap.set(i, rowMap);
+      newBoard.push(row);
     }
+    return [newBoard, newBoardMap];
   }
 
   startGame() {
     this.intervalId = window.setInterval(this.runGame, this.interval);
-    console.log('Game started');
+    this.running = true;
+    console.log('game started');
   }
 
   stopGame() {
     if (!this.intervalId) return;
     window.clearInterval(this.intervalId);
-    console.log('Game stopped');
+    this.running = false;
+    console.log('game stopped');
   }
 
   resetGame() {
-    console.log('Game reset');
+    this.stopGame();
+    this.iteration = 0;
+    this.livingCells = 0;
+    this.board = [];
+    const [newBoard, newBoardMap] = this.generateBoard();
+    this.board = newBoard;
+    this.boardMap = newBoardMap;
+    console.log('game reset');
   }
 
-  private runGame() {
-    console.log('Game running');
-  }
+  runGame = () => {
+    console.log('game running');
+    this.iteration++;
+    let newCellCount = 0;
+    const [newBoard, newBoardMap] = this.generateBoard();
+    let gameOver = true;
+    this.board.forEach((row, i) => {
+      row.forEach((cell, j) => {
+        const newCell = newBoardMap.get(i)?.get(j)!;
+        const neighbors = this.getLiveNeighborCount(i, j);
+        if (cell[0]) {
+          gameOver = false;
+          if (neighbors < 2 || neighbors > 3) {
+            newCell[0] = false;
+          } else {
+            newCell[0] = true;
+          }
+        } else {
+          if (neighbors === 3) {
+            newCell[0] = true;
+          }
+        }
+        if (newCell[0]) newCellCount++;
+      });
+    });
+    if (gameOver || this.iteration === 999999) this.stopGame();
+    this.livingCells = newCellCount;
+    this.board = newBoard;
+    this.boardMap = newBoardMap;
+  };
 
   flipCell(row: number, col: number) {
     const cell = this.boardMap.get(row)?.get(col);
     if (cell === undefined) return;
-    console.log('before', cell[0]);
-    console.log('ref', this.boardMap.get(row)?.get(col));
-    console.log('arr ref', this.board[row][col]);
     cell[0] = !cell[0];
-    console.log('after', cell[0]);
-    console.log('ref', this.boardMap.get(row)?.get(col));
-    console.log('arr ref', this.board[row][col]);
     this.ref.detectChanges();
-    console.log('Cell flipped');
   }
 
-  /**
-   * Rules:
-   *  Birth:    An empty, or “dead,” cell with precisely three “live” neighbors (full cells) becomes live.
-   *  Death:    A live cell with zero or one neighbors dies of isolation; a live cell with four or more neighbors dies of overcrowding.
-   *  Survival: A live cell with two or three neighbors remains alive.
-   */
+  getLiveNeighborCount(row: number, col: number): number {
+    let liveNeighbors: number = 0;
+    for (let r = row - 1; r <= row + 1; r++) {
+      for (let c = col - 1; c <= col + 1; c++) {
+        if (r === row && c === col) continue;
+        if (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize) {
+          if (this.boardMap.get(r)?.get(c)?.[0]) liveNeighbors++;
+        }
+      }
+    }
+    return liveNeighbors;
+  }
 }
