@@ -1,6 +1,14 @@
+:host {
+    --black: #101010;
+    --white: #ffffff;
+    
+    --dark: var(--black);
+    --light: var(--white)
+}
+
 /* You can add global styles to this file, and also import other style files */
 body {
     display: block;
-    background-color: #171717;
+    background-color: var(--dark);
     margin: 0;
 }

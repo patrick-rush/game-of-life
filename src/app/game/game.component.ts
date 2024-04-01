@@ -21,22 +21,23 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
   styleUrl: './game.component.css',
 })
 export class GameComponent {
-  private readonly interval: number = 80;
-  boardSize: number = 60; // 62; // Board must be a positive, even number
-  maxBoardSize: number = 100;
-  minBoardSize: number = 20;
+  private readonly interval: number = 100;
   private intervalId: number | null = null;
+  readonly maxBoardSize: number = 100;
+  readonly minBoardSize: number = 20;
+  boardSize: number = 60; // Board must be a positive, even number
 
-  running: boolean = false;
-  iteration: number = 0;
-  maxIterations: number = 999999;
-  livingCells: number = 0;
+  boardMap: BoardMap;
+  board: [boolean][][];
+  currentColor: string;
+
+  cellSize: string = '14px';
   colorMode: boolean = false;
   colorButtonHovered: boolean = false;
-  board: [boolean][][];
-  boardMap: BoardMap;
-  currentColor: string;
-  cellSize: string = '14px';
+  iteration: number = 0;
+  livingCells: number = 0;
+  maxIterations: number = 999999;
+  running: boolean = false;
 
   boardSizeForm = new FormGroup({
     boardSize: new FormControl('60'),
@@ -48,21 +49,6 @@ export class GameComponent {
     this.boardMap = newBoardMap;
     this.writeName();
     this.currentColor = this.updateColor();
-  }
-
-  handleFormSubmit() {
-    console.log('form submitted');
-    const { boardSize } = this.boardSizeForm.value;
-    if (!boardSize) return;
-    this.boardSize = this.enforceValidNumber(+boardSize);
-    this.cellSize = Math.round(840 / this.boardSize) + 'px';
-    this.resetGame();
-  }
-
-  enforceValidNumber(value: number): number {
-    if (value > this.maxBoardSize) return this.maxBoardSize;
-    if (value < this.minBoardSize) return this.minBoardSize;
-    return value % 2 === 0 ? value : value + 1;
   }
 
   generateBoard(): [[boolean][][], BoardMap] {
@@ -172,13 +158,16 @@ export class GameComponent {
 
   getLiveNeighborCount(boardMap: BoardMap, row: number, col: number): number {
     let liveNeighbors: number = 0;
-
     for (let r = row - 1, rr = row + 1; r <= rr; r++) {
       for (let c = col - 1, cc = col + 1; c <= cc; c++) {
         if (r === row && c === col) continue;
-        if (r >= 0 && r < this.boardSize && c >= 0 && c < this.boardSize) {
-          if (this.getCellValue(boardMap, r, c)) liveNeighbors++;
-        }
+        let thisRow = r;
+        let thisColumn = c;
+        if (r < 0) thisRow = this.boardSize - 1;
+        if (r >= this.boardSize) thisRow = 0;
+        if (c < 0) thisColumn = this.boardSize - 1;
+        if (c >= this.boardSize) thisColumn = 0;
+        if (this.getCellValue(boardMap, thisRow, thisColumn)) liveNeighbors++;
       }
     }
 
@@ -228,6 +217,21 @@ export class GameComponent {
     const color = this.colorCell.transform(this.livingCells, this.boardSize);
     this.currentColor = color;
     return color;
+  }
+
+  handleFormSubmit() {
+    console.log('form submitted');
+    const { boardSize } = this.boardSizeForm.value;
+    if (!boardSize) return;
+    this.boardSize = this.enforceValidNumber(+boardSize);
+    this.cellSize = Math.round(840 / this.boardSize) + 'px';
+    this.resetGame();
+  }
+
+  enforceValidNumber(value: number): number {
+    if (value > this.maxBoardSize) return this.maxBoardSize;
+    if (value < this.minBoardSize) return this.minBoardSize;
+    return value % 2 === 0 ? value : value + 1;
   }
 
   cloneBoard(): [[boolean][][], BoardMap] {

@@ -1,3 +1,11 @@
+:host {
+    --black: #101010;
+    --white: #ffffff;
+    
+    --dark: var(--black);
+    --light: var(--white)
+}
+
 .game {
     display: flex;
     flex-direction: column;
@@ -14,16 +22,16 @@ button {
     margin: 0 10px;
     font-family: monospace;
     font-size: 16px;
-    background-color: #ffffff;
-    border: 1px solid #171717;
+    background-color: var(--light);
+    border: 1px solid var(--dark);
     border-radius: 5px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #171717;
-    color: #ffffff;
-    border: 1px solid #ffffff;
+    background-color: var(--dark);
+    color: var(--light);
+    border: 1px solid var(--light);
 }
 
 .pill {
@@ -35,8 +43,8 @@ button:hover {
     margin: 0 10px;
     font-family: monospace;
     font-size: 16px;
-    background-color: #ffffff;
-    border: 1px solid #171717;
+    background-color: var(--light);
+    border: 1px solid var(--dark);
     border-radius: 5px;
 }
 
@@ -72,7 +80,7 @@ input[type='number']::-webkit-outer-spin-button {
     align-items: center;
     font-size: 16px;
     margin: 1rem;
-    color: #ffffff;
+    color: var(--light);
 
     span {
         margin: .5rem;
@@ -83,20 +91,19 @@ input[type='number']::-webkit-outer-spin-button {
     display: flex;
     width: auto;
     height: auto;
-    border: 1px solid #171717;
 }
 
 .cell {
     width: 14px;
     height: 14px;
-    background-color: #ffffff;
+    background-color: var(--light);
     border-radius: 100%;
 }
 
-.dark {
-    background-color: #171717;
+.cell.dark {
+    background-color: var(--dark);
 }
 
-.light {
-    background-color: #ffffff;
+.cell.light {
+    background-color: var(--light);
 }
