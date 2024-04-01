@@ -8,9 +8,16 @@
 
 .controls {
     display: flex;
-    justify-content: center;
     align-items: center;
     padding-top: 1rem;
+}
+
+form {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 }
 
 button {
@@ -32,14 +39,6 @@ button:hover {
     border: 1px solid var(--light);
 }
 
-form {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* padding-top: 1rem; */
-}
-
 .pill {
     height: 38px;;
     width: 9rem;
@@ -55,6 +54,7 @@ form {
 
 label {
     padding: 0 0.5rem;
+    color: var(--dark);
 }
 
 input {

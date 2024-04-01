@@ -10,6 +10,8 @@
 
 .main {
     display: flex;
+    flex-direction: column;
+    min-width: 60rem;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -33,6 +35,11 @@
     z-index: 1000;
     font-size: 1.2em;
   }
+
+
+.content {
+  min-width: 56rem;
+}
 
   @media (min-width: 930px) {
     .game {
