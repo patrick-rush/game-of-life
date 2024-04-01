@@ -97,7 +97,7 @@ input[type='number']::-webkit-outer-spin-button {
     width: 14px;
     height: 14px;
     background-color: var(--light);
-    border-radius: 100%;
+    border-radius: 10%;
 }
 
 .cell.dark {
