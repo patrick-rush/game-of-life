@@ -8,6 +8,6 @@ import { Component, Input } from '@angular/core';
   styleUrl: './details.component.css',
 })
 export class DetailsComponent {
-  @Input({ required: true }) iteration!: number;
-  @Input({ required: true }) livingCells!: number;
+  @Input({ required: true }) iteration: number = 0;
+  @Input({ required: true }) livingCells: number = 0;
 }
