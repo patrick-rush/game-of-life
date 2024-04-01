@@ -12,13 +12,7 @@
       (resetGamePlayEvent)="resetGame()"
       (randomizeBoardEvent)="randomizeBoard()"
     />
-    <div class="details">
-      <span>Iteration: {{ this.iteration.toString().padStart(6, "0") }}</span>
-      <span
-        >Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span
-      >
-    </div>
-    <div class="inputs input-group"></div>
+    <app-details [iteration]="iteration" [livingCells]="livingCells" />
   </div>
   <div>
     <div class="board">

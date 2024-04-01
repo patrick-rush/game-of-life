@@ -3,12 +3,14 @@ import { Component } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
 import { LIFE } from '../../constants';
 import { ControlsComponent } from '../controls/controls.component';
+import { DetailsComponent } from '../details/details.component';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
 @Component({
   selector: 'app-game',
   standalone: true,
   imports: [
+    DetailsComponent,
     ColorCellPipe,
     CommonModule,
     ControlsComponent,

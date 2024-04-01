@@ -1,0 +1,20 @@
+:host {
+    --black: #101010;
+    --white: #ffffff;
+    
+    --dark: var(--black);
+    --light: var(--white)
+}
+
+.details {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 16px;
+    margin: 1rem;
+    color: var(--light);
+
+    span {
+        margin: .5rem;
+    }
+}
