@@ -2,7 +2,7 @@ import { CommonModule, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
 import { LIFE } from '../../constants';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ControlsComponent } from '../controls/controls.component';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
 @Component({
@@ -11,7 +11,7 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
   imports: [
     ColorCellPipe,
     CommonModule,
-    ReactiveFormsModule,
+    ControlsComponent,
     NgFor,
     NgIf,
     NgStyle,
@@ -23,25 +23,20 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
 export class GameComponent {
   private readonly interval: number = 100;
   private intervalId: number | null = null;
-  readonly maxBoardSize: number = 100;
-  readonly minBoardSize: number = 20;
   boardSize: number = 60; // Board must be a positive, even number
 
-  boardMap: BoardMap;
   board: [boolean][][];
-  currentColor: string;
+  boardMap: BoardMap;
 
   cellSize: string = '14px';
   colorMode: boolean = false;
   colorButtonHovered: boolean = false;
-  iteration: number = 0;
-  livingCells: number = 0;
-  maxIterations: number = 999999;
-  running: boolean = false;
+  currentColor: string;
 
-  boardSizeForm = new FormGroup({
-    boardSize: new FormControl('60'),
-  });
+  iteration: number = 0;
+  maxIterations: number = 999999;
+  livingCells: number = 0;
+  running: boolean = false;
 
   constructor(private colorCell: ColorCellPipe) {
     const [newBoard, newBoardMap] = this.generateBoard();
@@ -182,7 +177,7 @@ export class GameComponent {
     return this.getCell(board, row, col)[0]!;
   }
 
-  flipColorMode() {
+  toggleColorMode() {
     this.colorMode = !this.colorMode;
   }
 
@@ -219,19 +214,10 @@ export class GameComponent {
     return color;
   }
 
-  handleFormSubmit() {
-    console.log('form submitted');
-    const { boardSize } = this.boardSizeForm.value;
-    if (!boardSize) return;
-    this.boardSize = this.enforceValidNumber(+boardSize);
+  handleChangeBoardSize(size: number) {
+    this.boardSize = size;
     this.cellSize = Math.round(840 / this.boardSize) + 'px';
     this.resetGame();
-  }
-
-  enforceValidNumber(value: number): number {
-    if (value > this.maxBoardSize) return this.maxBoardSize;
-    if (value < this.minBoardSize) return this.minBoardSize;
-    return value % 2 === 0 ? value : value + 1;
   }
 
   cloneBoard(): [[boolean][][], BoardMap] {

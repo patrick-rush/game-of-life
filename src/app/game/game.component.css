@@ -15,65 +15,6 @@
     width: 100%;
 }
 
-button {
-    height: 40px;
-    width: 10rem;
-    padding: 10px 20px;
-    margin: 0 10px;
-    font-family: monospace;
-    font-size: 16px;
-    background-color: var(--light);
-    border: 1px solid var(--dark);
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: var(--dark);
-    color: var(--light);
-    border: 1px solid var(--light);
-}
-
-.pill {
-    height: 40px;
-    width: 10rem;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin: 0 10px;
-    font-family: monospace;
-    font-size: 16px;
-    background-color: var(--light);
-    border: 1px solid var(--dark);
-    border-radius: 5px;
-}
-
-label {
-    padding-left: 1rem;
-}
-
-input {
-    text-align: center;
-    height: auto;
-    width: auto;
-    font-family: monospace;
-    font-size: 16px;
-    border: none;
-}
-
-input[type='number']::-webkit-inner-spin-button, 
-input[type='number']::-webkit-outer-spin-button { 
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-top: 1rem;
-}
-
 .details {
     display: flex;
     justify-content: space-around;

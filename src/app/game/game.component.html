@@ -1,50 +1,17 @@
 <div class="game">
   <div class="header">
-    <div class="controls">
-      @if (running) {
-      <button (click)="stopGame()">Stop Game</button>
-      } @else {
-      <button (click)="startGame()">Start Game</button>
-      }
-      <button (click)="resetGame()">Reset Game</button>
-      <button (click)="randomizeBoard()">Random Board</button>
-      @if (colorMode) {
-      <button (click)="flipColorMode()">B&W</button>
-      } @else {
-      <button
-        (click)="flipColorMode()"
-        [ngStyle]="
-          colorButtonHovered
-            ? { 'background-color': currentColor }
-            : { 'background-color': '#ffffff' }
-        "
-        (mouseover)="colorButtonHovered = true"
-        (mouseout)="colorButtonHovered = false"
-      >
-        Color
-      </button>
-      }
-      <form
-        name="boardSizeForm"
-        [formGroup]="boardSizeForm"
-        (ngSubmit)="handleFormSubmit()"
-        class="pill"
-      >
-        <label for="boardSize" aria-hidden="false">Size</label>
-        <input
-          type="number"
-          min="22"
-          max="122"
-          step="2"
-          id="boardSize"
-          formControlName="boardSize"
-          value="{{ boardSize }}"
-          title="Value from {{ minBoardSize }} to {{ maxBoardSize }}"
-        />
-        <button type="submit" hidden></button>
-      </form>
-      <!-- </div> -->
-    </div>
+    <app-controls
+      [boardSize]="boardSize"
+      [colorMode]="colorMode"
+      [currentColor]="currentColor"
+      [running]="running"
+      (boardSizeChangeEvent)="handleChangeBoardSize($event)"
+      (toggleColorModeEvent)="toggleColorMode()"
+      (startGamePlayEvent)="startGame()"
+      (stopGamePlayEvent)="stopGame()"
+      (resetGamePlayEvent)="resetGame()"
+      (randomizeBoardEvent)="randomizeBoard()"
+    />
     <div class="details">
       <span>Iteration: {{ this.iteration.toString().padStart(6, "0") }}</span>
       <span
