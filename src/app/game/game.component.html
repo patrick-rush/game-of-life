@@ -1,5 +1,5 @@
 <div class="game">
-  <div>
+  <div class="header">
     <div class="controls">
       @if (running) {
       <button (click)="stopGame()">Stop Game</button>
@@ -24,6 +24,26 @@
         Color
       </button>
       }
+      <form
+        name="boardSizeForm"
+        [formGroup]="boardSizeForm"
+        (ngSubmit)="handleFormSubmit()"
+        class="pill"
+      >
+        <label for="boardSize" aria-hidden="false">Size</label>
+        <input
+          type="number"
+          min="22"
+          max="122"
+          step="2"
+          id="boardSize"
+          formControlName="boardSize"
+          value="{{ boardSize }}"
+          title="Value from {{ minBoardSize }} to {{ maxBoardSize }}"
+        />
+        <button type="submit" hidden></button>
+      </form>
+      <!-- </div> -->
     </div>
     <div class="details">
       <span>Iteration: {{ this.iteration.toString().padStart(6, "0") }}</span>
@@ -31,6 +51,7 @@
         >Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span
       >
     </div>
+    <div class="inputs input-group"></div>
   </div>
   <div>
     <div class="board">
@@ -40,6 +61,7 @@
           <div
             *ngIf="!getCellValue(boardMap, rowIndex, columnIndex)"
             class="cell light"
+            [ngStyle]="{ width: cellSize, height: cellSize }"
             [attr.data-row]="rowIndex"
             [attr.data-col]="columnIndex"
             (click)="flipCell(rowIndex, columnIndex)"
@@ -47,6 +69,7 @@
           <div
             *ngIf="getCellValue(boardMap, rowIndex, columnIndex) && !colorMode"
             class="cell dark"
+            [ngStyle]="{ width: cellSize, height: cellSize }"
             [attr.data-row]="rowIndex"
             [attr.data-col]="columnIndex"
             (click)="flipCell(rowIndex, columnIndex)"
@@ -54,7 +77,11 @@
           <div
             *ngIf="getCellValue(boardMap, rowIndex, columnIndex) && colorMode"
             class="cell"
-            [ngStyle]="{ 'background-color': currentColor }"
+            [ngStyle]="{
+              'background-color': currentColor,
+              height: cellSize,
+              width: cellSize
+            }"
             [attr.data-row]="rowIndex"
             [attr.data-col]="columnIndex"
             (click)="flipCell(rowIndex, columnIndex)"

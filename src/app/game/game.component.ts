@@ -2,19 +2,29 @@ import { CommonModule, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
 import { LIFE } from '../../constants';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [ColorCellPipe, CommonModule, NgFor, NgIf, NgStyle],
+  imports: [
+    ColorCellPipe,
+    CommonModule,
+    ReactiveFormsModule,
+    NgFor,
+    NgIf,
+    NgStyle,
+  ],
   providers: [ColorCellPipe],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
 })
 export class GameComponent {
   private readonly interval: number = 80;
-  private readonly boardSize: number = 62; // Board must be a positive, even number
+  boardSize: number = 60; // 62; // Board must be a positive, even number
+  maxBoardSize: number = 100;
+  minBoardSize: number = 20;
   private intervalId: number | null = null;
 
   running: boolean = false;
@@ -26,6 +36,11 @@ export class GameComponent {
   board: [boolean][][];
   boardMap: BoardMap;
   currentColor: string;
+  cellSize: string = '14px';
+
+  boardSizeForm = new FormGroup({
+    boardSize: new FormControl('60'),
+  });
 
   constructor(private colorCell: ColorCellPipe) {
     const [newBoard, newBoardMap] = this.generateBoard();
@@ -33,6 +48,21 @@ export class GameComponent {
     this.boardMap = newBoardMap;
     this.writeName();
     this.currentColor = this.updateColor();
+  }
+
+  handleFormSubmit() {
+    console.log('form submitted');
+    const { boardSize } = this.boardSizeForm.value;
+    if (!boardSize) return;
+    this.boardSize = this.enforceValidNumber(+boardSize);
+    this.cellSize = Math.round(840 / this.boardSize) + 'px';
+    this.resetGame();
+  }
+
+  enforceValidNumber(value: number): number {
+    if (value > this.maxBoardSize) return this.maxBoardSize;
+    if (value < this.minBoardSize) return this.minBoardSize;
+    return value % 2 === 0 ? value : value + 1;
   }
 
   generateBoard(): [[boolean][][], BoardMap] {
@@ -195,7 +225,7 @@ export class GameComponent {
   }
 
   updateColor(): string {
-    const color = this.colorCell.transform(this.livingCells);
+    const color = this.colorCell.transform(this.livingCells, this.boardSize);
     this.currentColor = color;
     return color;
   }

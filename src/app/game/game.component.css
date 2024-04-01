@@ -26,6 +26,39 @@ button:hover {
     border: 1px solid #ffffff;
 }
 
+.pill {
+    height: 40px;
+    width: 10rem;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 0 10px;
+    font-family: monospace;
+    font-size: 16px;
+    background-color: #ffffff;
+    border: 1px solid #171717;
+    border-radius: 5px;
+}
+
+label {
+    padding-left: 1rem;
+}
+
+input {
+    text-align: center;
+    height: auto;
+    width: auto;
+    font-family: monospace;
+    font-size: 16px;
+    border: none;
+}
+
+input[type='number']::-webkit-inner-spin-button, 
+input[type='number']::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .controls {
     display: flex;
     justify-content: center;
@@ -54,10 +87,10 @@ button:hover {
 }
 
 .cell {
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     background-color: #ffffff;
-    border-radius: 8px;
+    border-radius: 100%;
 }
 
 .dark {
