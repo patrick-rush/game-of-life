@@ -2,7 +2,7 @@
 
 ![alt text](README-assets/image.png)
 
-<div>John Horton Conway's Game of Life is a cellular automaton that visualizes the evolution of state within a system.
+<div>John Horton Conway's Game of Life (aka Life) is a cellular automaton that visualizes the evolution of state within a system.
 
 The rules are as follows:
 
@@ -11,9 +11,13 @@ The rules are as follows:
 1. Any live cell with more than three live neighbors dies, as if by overpopulation.
 1. Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
 
-Click around to create your initial state, and then hit Start Game to get going. There are some initial states that can produce some fascinating outcomes. Read about them on [Wikipedia](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
+Click around to create your initial state, and then hit Start Game to get going. There are some initial states that can produce some fascinating outcomes. Read about them on [Wikipedia](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) or on [LifeWiki](https://conwaylife.com/wiki), Life's dedicated wiki.
 
 The color of the living cells represents how much of the board is alive at that moment, with <span class="red">reddish brown</span> representing death, <span class="yellow">and each</span> <span class="green">color after</span> <span class="blue">representing more</span> <span class="violet">and more life</span>.
+
+This version of Life is toroidal, with each of the edges virtually connected to one another, creating an infinitely repeating board effect.
+
+I also have to shout-out by far the coolest visual representation of a toroidal Game of Life by Tim Hau, which you can check out [here](https://observablehq.com/@timhau/conways-game-of-life-on-a-torus). Beautifully done 👏🏼
 
 ---
 
@@ -34,7 +38,7 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-##### Sorry GitHub folks, pardon the
+##### Sorry GitHub folks, pardon the styles...
 
 <style>
     :root{
