@@ -1,5 +1,5 @@
 import { NgStyle } from '@angular/common';
-import { Component, EventEmitter, Input, Output, input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -11,11 +11,13 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 })
 export class ControlsComponent {
   @Input({ required: true }) boardSize!: number;
+  @Input({ required: true }) interval!: number;
   @Input({ required: true }) colorMode!: boolean;
   @Input({ required: true }) currentColor!: string;
   @Input({ required: true }) running!: boolean;
 
   @Output() boardSizeChangeEvent = new EventEmitter<number>();
+  @Output() intervalChangeEvent = new EventEmitter<number>();
   @Output() toggleColorModeEvent = new EventEmitter<void>();
   @Output() startGamePlayEvent = new EventEmitter<void>();
   @Output() stopGamePlayEvent = new EventEmitter<void>();
@@ -25,18 +27,42 @@ export class ControlsComponent {
   colorButtonHovered: boolean = false;
   readonly minBoardSize: number = 20;
   readonly maxBoardSize: number = 100;
+  readonly boardSizeStep: number = 2;
+  readonly minInterval: number = 10;
+  readonly maxInterval: number = 200;
+  readonly intervalStep: number = 10;
 
-  boardSizeForm = new FormGroup({
+  gameForm = new FormGroup({
     boardSize: new FormControl('60'),
+    interval: new FormControl('100'),
   });
 
-  constructor() {}
+  handleFormSubmit() {
+    let { boardSize, interval } = this.gameForm.value;
+    if (boardSize && +boardSize !== this.boardSize)
+      this.handleBoardSizeChange(+boardSize);
+    if (interval && +interval !== this.interval)
+      this.handleIntervalChange(+interval);
+  }
 
-  handleBoardSizeChange() {
-    const { boardSize } = this.boardSizeForm.value;
-    if (!boardSize) return;
-    this.boardSize = this.enforceValidNumber(+boardSize);
+  handleBoardSizeChange(size: number) {
+    this.boardSize = this.enforceValidNumber(
+      size,
+      this.minBoardSize,
+      this.maxBoardSize,
+      this.boardSizeStep
+    );
     this.boardSizeChangeEvent.emit(this.boardSize);
+  }
+
+  handleIntervalChange(interval: number) {
+    this.interval = this.enforceValidNumber(
+      interval,
+      this.minInterval,
+      this.maxInterval,
+      this.intervalStep
+    );
+    this.intervalChangeEvent.emit(this.interval);
   }
 
   handleToggleColorMode() {
@@ -56,9 +82,15 @@ export class ControlsComponent {
     this.randomizeBoardEvent.emit();
   }
 
-  enforceValidNumber(value: number): number {
-    if (value > this.maxBoardSize) return this.maxBoardSize;
-    if (value < this.minBoardSize) return this.minBoardSize;
-    return value % 2 === 0 ? value : value + 1;
+  enforceValidNumber(
+    input: number,
+    min: number,
+    max: number,
+    step: number
+  ): number {
+    input = Math.round(input);
+    if (input > max) return max;
+    if (input < min) return min;
+    return input % step === 0 ? input : Math.ceil(input / step) * step;
   }
 }

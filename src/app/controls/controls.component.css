@@ -6,11 +6,17 @@
     --light: var(--white)
 }
 
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1rem;
+}
+
 button {
     height: 40px;
-    width: 10rem;
-    padding: 10px 20px;
-    margin: 0 10px;
+    width: 9rem;
+    /* margin: 0 10px; */
     font-family: monospace;
     font-size: 16px;
     color: var(--dark);
@@ -26,13 +32,20 @@ button:hover {
     border: 1px solid var(--light);
 }
 
+form {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* padding-top: 1rem; */
+}
+
 .pill {
-    height: 40px;
-    width: 10rem;
+    height: 38px;;
+    width: 9rem;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin: 0 10px;
     font-family: monospace;
     font-size: 16px;
     background-color: var(--light);
@@ -41,7 +54,7 @@ button:hover {
 }
 
 label {
-    padding-left: 1rem;
+    padding: 0 0.5rem;
 }
 
 input {
@@ -57,11 +70,4 @@ input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button { 
     -webkit-appearance: none;
     margin: 0;
-}
-
-.controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-top: 1rem;
 }

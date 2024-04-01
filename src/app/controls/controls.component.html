@@ -18,23 +18,33 @@
     Color
   </button>
   }
-  <form
-    name="boardSizeForm"
-    [formGroup]="boardSizeForm"
-    (ngSubmit)="handleBoardSizeChange()"
-    class="pill"
-  >
-    <label for="boardSize" aria-hidden="false">Size</label>
-    <input
-      type="number"
-      min="{{ minBoardSize }}"
-      max="{{ maxBoardSize }}"
-      step="2"
-      id="boardSize"
-      formControlName="boardSize"
-      value="{{ boardSize }}"
-      title="Value from {{ minBoardSize }} to {{ maxBoardSize }}"
-    />
+  <form name="gameForm" [formGroup]="gameForm" (ngSubmit)="handleFormSubmit()">
+    <div class="pill">
+      <label for="boardSize" aria-hidden="false">Size</label>
+      <input
+        type="number"
+        min="{{ minBoardSize }}"
+        max="{{ maxBoardSize }}"
+        step="{{ boardSizeStep }}"
+        id="boardSize"
+        formControlName="boardSize"
+        value="{{ boardSize }}"
+        title="Value from {{ minBoardSize }} to {{ maxBoardSize }}"
+      />
+    </div>
+    <div class="pill">
+      <label for="interval" aria-hidden="false">Interval</label>
+      <input
+        type="number"
+        min="{{ minInterval }}"
+        max="{{ maxInterval }}"
+        step="{{ intervalStep }}"
+        id="interval"
+        formControlName="interval"
+        value="{{ interval }}"
+        title="Value from {{ minInterval }} to {{ maxInterval }}"
+      />
+    </div>
     <button type="submit" hidden></button>
   </form>
 </div>

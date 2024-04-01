@@ -2,10 +2,12 @@
   <div class="header">
     <app-controls
       [boardSize]="boardSize"
+      [interval]="interval"
       [colorMode]="colorMode"
       [currentColor]="currentColor"
       [running]="running"
       (boardSizeChangeEvent)="handleChangeBoardSize($event)"
+      (intervalChangeEvent)="handleChangeInterval($event)"
       (toggleColorModeEvent)="toggleColorMode()"
       (startGamePlayEvent)="startGame()"
       (stopGamePlayEvent)="stopGame()"

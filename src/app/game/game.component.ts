@@ -23,8 +23,8 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
   styleUrl: './game.component.css',
 })
 export class GameComponent {
-  private readonly interval: number = 100;
   private intervalId: number | null = null;
+  interval: number = 100;
   boardSize: number = 60; // Board must be a positive, even number
 
   board: [boolean][][];
@@ -220,6 +220,12 @@ export class GameComponent {
     this.boardSize = size;
     this.cellSize = Math.round(840 / this.boardSize) + 'px';
     this.resetGame();
+  }
+
+  handleChangeInterval(interval: number) {
+    this.interval = interval;
+    this.stopGame();
+    this.startGame();
   }
 
   cloneBoard(): [[boolean][][], BoardMap] {
