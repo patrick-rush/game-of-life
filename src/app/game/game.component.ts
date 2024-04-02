@@ -31,12 +31,12 @@ type BoardMap = Map<number, Map<number, [CellState]>>;
 export class GameComponent {
   private intervalId: number | null = null;
   interval: number = 100;
-  boardSize: number = 40; // Board must be a positive, even number
+  boardSize: number = 70; // Board must be a positive, even number
 
   board: [CellState][][];
   boardMap: BoardMap;
 
-  cellSize: string = '21px';
+  cellSize: string = '10px';
   colorMode: boolean = false;
   colorButtonHovered: boolean = false;
 
@@ -44,13 +44,21 @@ export class GameComponent {
   maxIterations: number = 999999;
   rockCount: number = 0;
   paperCount: number = 0;
-  scissorCount: number = 0;
+  scissorsCount: number = 0;
   running: boolean = false;
+
+  rockColor: string;
+  paperColor: string;
+  scissorsColor: string;
 
   constructor() {
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
+    const [rockColor, paperColor, scissorsColor] = this.toggleColorMode();
+    this.rockColor = rockColor;
+    this.paperColor = paperColor;
+    this.scissorsColor = scissorsColor;
   }
 
   generateBoard(): [[CellState][][], BoardMap] {
@@ -129,7 +137,7 @@ export class GameComponent {
     });
     this.rockCount = rock;
     this.paperCount = paper;
-    this.scissorCount = scissors;
+    this.scissorsCount = scissors;
   };
 
   tallyNeighbors(
@@ -183,13 +191,22 @@ export class GameComponent {
     return this.getCell(board, row, col)[0]!;
   }
 
-  toggleColorMode() {
+  toggleColorMode(): [string, string, string] {
+    const genRanHex = (size: number) =>
+      [...Array(size)]
+        .map(() => Math.floor(Math.random() * 16).toString(16))
+        .join('');
+    this.rockColor = '#' + genRanHex(6);
+    this.paperColor = '#' + genRanHex(6);
+    this.scissorsColor = '#' + genRanHex(6);
+    console.log(this.paperColor);
     this.colorMode = !this.colorMode;
+    return [this.rockColor, this.paperColor, this.scissorsColor];
   }
 
   handleChangeBoardSize(size: number) {
     this.boardSize = size;
-    this.cellSize = Math.round(840 / this.boardSize) + 'px';
+    this.cellSize = Math.round(750 / this.boardSize) + 'px';
     this.resetGame();
   }
 

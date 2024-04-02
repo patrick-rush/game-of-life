@@ -15,31 +15,39 @@
     <app-details [iteration]="iteration" />
   </div>
   <div>
-    <!-- <div (mouseup)="setDragging(false)" (mouseleave)="setDragging(false)"> -->
-
     <div class="board">
       <div *ngFor="let row of board; let rowIndex = index">
         <div *ngFor="let cell of row; let colIndex = index">
-          <!-- datasets added for future event use -->
           <div
             *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 0"
-            class="cell achrom rock"
-            [ngStyle]="{ width: cellSize, height: cellSize }"
+            class="cell rock"
+            [ngStyle]="{
+              width: cellSize,
+              height: cellSize,
+              backgroundColor: rockColor
+            }"
           ></div>
           <div
             *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 1"
-            class="cell achrom paper"
-            [ngStyle]="{ width: cellSize, height: cellSize }"
+            class="cell paper"
+            [ngStyle]="{
+              width: cellSize,
+              height: cellSize,
+              backgroundColor: paperColor
+            }"
           ></div>
           <div
             *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 2"
-            class="cell achrom scissors"
-            [ngStyle]="{ width: cellSize, height: cellSize }"
+            class="cell scissors"
+            [ngStyle]="{
+              width: cellSize,
+              height: cellSize,
+              backgroundColor: scissorsColor
+            }"
           ></div>
         </div>
       </div>
     </div>
-    <!-- </div> -->
   </div>
   <div></div>
 </div>

@@ -23,7 +23,7 @@ export class ControlsComponent {
   @Output() resetGamePlayEvent = new EventEmitter<void>();
 
   colorButtonHovered: boolean = false;
-  readonly defaultBoardSize: number = 40;
+  readonly defaultBoardSize: number = 70;
   readonly minBoardSize: number = 20;
   readonly maxBoardSize: number = 100;
   readonly boardSizeStep: number = 2;

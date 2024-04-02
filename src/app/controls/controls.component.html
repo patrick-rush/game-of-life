@@ -3,18 +3,7 @@
     <button class="submit" type="submit" hidden></button>
     <button (click)="handleGamePlay()">{{ running ? "Stop" : "Start" }}</button>
     <button (click)="handleResetGamePlay()">Reset</button>
-    @if (colorMode) {
-    <button (click)="handleToggleColorMode()">B&W</button>
-    } @else {
-    <button
-      (click)="handleToggleColorMode()"
-      [ngStyle]="{ 'background-color': '#ffffff' }"
-      (mouseover)="colorButtonHovered = true"
-      (mouseout)="colorButtonHovered = false"
-    >
-      Color
-    </button>
-    }
+    <button (click)="handleToggleColorMode()">New Colors</button>
     <div class="pill">
       <label for="boardSize" aria-hidden="false">Size</label>
       <input
