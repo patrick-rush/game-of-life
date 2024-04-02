@@ -9,5 +9,4 @@ import { Component, Input } from '@angular/core';
 })
 export class DetailsComponent {
   @Input({ required: true }) iteration: number = 0;
-  @Input({ required: true }) livingCells: number = 0;
 }

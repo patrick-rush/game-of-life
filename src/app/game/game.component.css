@@ -3,7 +3,28 @@
     --white: #ffffff;
     
     --dark: var(--black);
-    --light: var(--white)
+    --light: var(--white);
+
+    --fire-rock: #ff4e50;
+    --fire-paper: #fc913a;
+    --fire-scissors: #f9d423;
+
+    --trendy-rock: #ef5b5b;
+    --trendy-paper: #20a39e;
+    --trendy-scissors: #ffba49;
+
+    --pink-rock: #f7edf0;
+    --pink-paper: #f4afab;
+    --pink-scissors: #f4cbc6;
+
+    --camo-rock: #ffeedb;
+    --camo-paper: #a3b18a;
+    --camo-scissors: #588157;
+
+    
+    --achrom-rock: #e3e3e3;
+    --achrom-paper: #989898;
+    --achrom-scissors: #202020;
 }
 
 .game {
@@ -29,13 +50,65 @@
     width: 14px;
     height: 14px;
     background-color: var(--light);
-    border-radius: 10%;
+    border-radius: 100%;
 }
 
-.cell.dark {
-    background-color: var(--dark);
+.cell.pink.rock {
+    background-color: var(--pink-rock);
 }
 
-.cell.light {
-    background-color: var(--light);
+.cell.pink.paper {
+    background-color: var(--pink-paper);
+}
+
+.cell.pink.scissors {
+    background-color: var(--pink-scissors);
+}
+
+.cell.fire.rock {
+    background-color: var(--fire-rock);
+}
+
+.cell.fire.paper {
+    background-color: var(--fire-paper);
+}
+
+.cell.fire.scissors {
+    background-color: var(--fire-scissors);
+}
+
+.cell.trendy.rock {
+    background-color: var(--trendy-rock);
+}
+
+.cell.trendy.paper {
+    background-color: var(--trendy-paper);
+}
+
+.cell.trendy.scissors {
+    background-color: var(--trendy-scissors);
+}
+
+.cell.camo.rock {
+    background-color: var(--camo-rock);
+}
+
+.cell.camo.paper {
+    background-color: var(--camo-paper);
+}
+
+.cell.camo.scissors {
+    background-color: var(--camo-scissors);
+}
+
+.cell.achrom.rock {
+    background-color: var(--achrom-rock);
+}
+
+.cell.achrom.paper {
+    background-color: var(--achrom-paper);
+}
+
+.cell.achrom.scissors {
+    background-color: var(--achrom-scissors);
 }

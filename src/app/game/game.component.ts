@@ -1,11 +1,17 @@
 import { CommonModule, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
-import { LIFE } from '../../constants';
 import { ControlsComponent } from '../controls/controls.component';
 import { DetailsComponent } from '../details/details.component';
 
-type BoardMap = Map<number, Map<number, [boolean]>>;
+enum CellState {
+  ROCK,
+  PAPER,
+  SCISSORS,
+}
+
+type BoardMap = Map<number, Map<number, [CellState]>>;
+
 @Component({
   selector: 'app-game',
   standalone: true,
@@ -25,41 +31,37 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
 export class GameComponent {
   private intervalId: number | null = null;
   interval: number = 100;
-  boardSize: number = 60; // Board must be a positive, even number
+  boardSize: number = 40; // Board must be a positive, even number
 
-  board: [boolean][][];
+  board: [CellState][][];
   boardMap: BoardMap;
 
-  cellSize: string = '14px';
+  cellSize: string = '21px';
   colorMode: boolean = false;
   colorButtonHovered: boolean = false;
-  currentColor: string;
 
   iteration: number = 0;
   maxIterations: number = 999999;
-  livingCells: number = 0;
+  rockCount: number = 0;
+  paperCount: number = 0;
+  scissorCount: number = 0;
   running: boolean = false;
 
-  dragging: boolean = false;
-  dragBehavior: 'create' | 'destroy' | null = null;
-  hoveredCell: [number, number] | null = null;
-
-  constructor(private colorCell: ColorCellPipe) {
+  constructor() {
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
-    this.writeName();
-    this.currentColor = this.updateColor();
   }
 
-  generateBoard(): [[boolean][][], BoardMap] {
-    const newBoard: [boolean][][] = [];
+  generateBoard(): [[CellState][][], BoardMap] {
+    const newBoard: [CellState][][] = [];
     const newBoardMap: BoardMap = new Map();
-    for (let i = 0; i < this.boardSize; i++) {
-      const row: [boolean][] = [];
-      const rowMap = new Map<number, [boolean]>();
+    for (let i = 0; i < this.boardSize * 2; i++) {
+      const row: [CellState][] = [];
+      const rowMap = new Map<number, [CellState]>();
       for (let j = 0; j < this.boardSize; j++) {
-        const cell: [boolean] = [false];
+        const random = Math.floor(Math.random() * 3);
+        const cell: [CellState] = [random];
         rowMap.set(j, cell);
         row.push(cell);
       }
@@ -67,19 +69,6 @@ export class GameComponent {
       newBoard.push(row);
     }
     return [newBoard, newBoardMap];
-  }
-
-  randomizeBoard() {
-    this.resetGame();
-    const boundary = Math.random() * (0.95 - 0.7) + 0.7;
-    this.board.forEach((row) => {
-      row.forEach((cell) => {
-        if (Math.random() > boundary) {
-          cell[0] = true;
-          this.updateLivingCellCount();
-        }
-      });
-    });
   }
 
   startGame(): void {
@@ -109,114 +98,93 @@ export class GameComponent {
     this.stopGame();
     const [newBoard, newBoardMap] = this.generateBoard();
     this.iteration = 0;
-    this.updateLivingCellCount(0);
     this.board = newBoard;
     this.boardMap = newBoardMap;
   }
 
   runGame = () => {
     this.iteration++;
-    let newCellCount = 0;
-    let gameOver = true;
+    let rock = 0;
+    let paper = 0;
+    let scissors = 0;
     const [boardClone, boardMapClone] = this.cloneBoard();
 
     boardClone.forEach((row, i) => {
-      row.forEach((cell, j) => {
+      row.forEach((_, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
-        const neighbors = this.getLiveNeighborCount(boardMapClone, i, j);
-        if (cell[0]) {
-          gameOver = false;
-          if (neighbors < 2 || neighbors > 3) {
-            activeCell[0] = false;
-          } else {
-            activeCell[0] = true;
-          }
-        } else {
-          if (neighbors === 3) {
-            activeCell[0] = true;
-          }
-        }
-        if (activeCell[0]) newCellCount++;
+        const neighbors = this.tallyNeighbors(boardMapClone, i, j);
+        if (activeCell[0] === CellState.ROCK && neighbors[CellState.PAPER] >= 3)
+          activeCell[0] = CellState.PAPER;
+        if (
+          activeCell[0] === CellState.PAPER &&
+          neighbors[CellState.SCISSORS] >= 3
+        )
+          activeCell[0] = CellState.SCISSORS;
+        if (
+          activeCell[0] === CellState.SCISSORS &&
+          neighbors[CellState.ROCK] >= 3
+        )
+          activeCell[0] = CellState.ROCK;
       });
     });
-
-    if (gameOver || this.iteration === this.maxIterations) this.stopGame();
-    this.updateLivingCellCount(newCellCount);
+    this.rockCount = rock;
+    this.paperCount = paper;
+    this.scissorCount = scissors;
   };
 
-  flipCell(row: number, col: number) {
-    const cell = this.getCell(this.boardMap, row, col);
-
-    if (!cell) return;
-
-    const newValue = !cell[0];
-    cell[0] = newValue;
-
-    if (newValue) this.updateLivingCellCount();
-    else this.updateLivingCellCount(-1);
-  }
-
-  getLiveNeighborCount(boardMap: BoardMap, row: number, col: number): number {
-    let liveNeighbors: number = 0;
+  tallyNeighbors(
+    boardMap: BoardMap,
+    row: number,
+    col: number
+  ): {
+    [CellState.ROCK]: number;
+    [CellState.PAPER]: number;
+    [CellState.SCISSORS]: number;
+  } {
+    let rock: number = 0;
+    let paper: number = 0;
+    let scissors: number = 0;
     for (let r = row - 1, rr = row + 1; r <= rr; r++) {
       for (let c = col - 1, cc = col + 1; c <= cc; c++) {
         if (r === row && c === col) continue;
         let thisRow = r;
         let thisColumn = c;
         if (r < 0) thisRow = this.boardSize - 1;
-        if (r >= this.boardSize) thisRow = 0;
+        if (r >= this.boardSize * 2) thisRow = 0;
         if (c < 0) thisColumn = this.boardSize - 1;
         if (c >= this.boardSize) thisColumn = 0;
-        if (this.getCellValue(boardMap, thisRow, thisColumn)) liveNeighbors++;
+        const cellValue = this.getCellValue(boardMap, thisRow, thisColumn);
+        switch (cellValue) {
+          case CellState.ROCK:
+            rock++;
+            break;
+          case CellState.PAPER:
+            paper++;
+            break;
+          case CellState.SCISSORS:
+            scissors++;
+            break;
+        }
       }
     }
 
-    return liveNeighbors;
+    return {
+      [CellState.ROCK]: rock,
+      [CellState.PAPER]: paper,
+      [CellState.SCISSORS]: scissors,
+    };
   }
 
-  getCell(board: BoardMap, row: number, col: number): [boolean] {
+  getCell(board: BoardMap, row: number, col: number): [CellState] {
     return board.get(row)?.get(col)!;
   }
 
-  getCellValue(board: BoardMap, row: number, col: number): boolean {
+  getCellValue(board: BoardMap, row: number, col: number): CellState {
     return this.getCell(board, row, col)[0]!;
   }
 
   toggleColorMode() {
     this.colorMode = !this.colorMode;
-  }
-
-  writeName() {
-    const boardSizeReference = this.boardSize / 2;
-    const negativeSpace = LIFE.length;
-    const min = boardSizeReference - negativeSpace / 2;
-    for (let row = 0; row < negativeSpace; row++) {
-      for (let col = 0; col < negativeSpace; col++) {
-        const cell = LIFE[col][row];
-        if (cell) {
-          this.flipCell(row + min, col + min);
-        }
-      }
-    }
-  }
-
-  /**
-   * @param count
-   * (optional) if provided, will set the living cell count to the provided value.
-   * If -1, will decrement the living cell count by 1.
-   * If not provided, will increment the living cell count by 1.
-   */
-  updateLivingCellCount(count?: number): void {
-    if (count === -1) this.livingCells--;
-    else if (count != null) this.livingCells = count;
-    else this.livingCells++;
-    this.updateColor();
-  }
-
-  updateColor(): string {
-    const color = this.colorCell.transform(this.livingCells, this.boardSize);
-    this.currentColor = color;
-    return color;
   }
 
   handleChangeBoardSize(size: number) {
@@ -231,14 +199,14 @@ export class GameComponent {
     this.startGame();
   }
 
-  cloneBoard(): [[boolean][][], BoardMap] {
-    const clonedBoard: [boolean][][] = [];
+  cloneBoard(): [[CellState][][], BoardMap] {
+    const clonedBoard: [CellState][][] = [];
     const clonedBoardMap: BoardMap = new Map();
-    for (let i = 0; i < this.boardSize; i++) {
-      const row: [boolean][] = [];
-      const rowMap = new Map<number, [boolean]>();
+    for (let i = 0; i < this.boardSize * 2; i++) {
+      const row: [CellState][] = [];
+      const rowMap = new Map<number, [CellState]>();
       for (let j = 0; j < this.boardSize; j++) {
-        const cell: [boolean] = [this.board[i][j][0]];
+        const cell: [CellState] = [this.board[i][j][0]];
         rowMap.set(j, cell);
         row.push(cell);
       }
@@ -246,33 +214,5 @@ export class GameComponent {
       clonedBoard.push(row);
     }
     return [clonedBoard, clonedBoardMap];
-  }
-
-  handleMouseOver(event: MouseEvent, row: number, col: number) {
-    const cellValue = this.getCellValue(this.boardMap, row, col);
-    const [hRow, hCol] = this.hoveredCell || [null, null];
-    if (this.dragging && hRow !== row && hCol !== col) {
-      this.hoveredCell = [row, col];
-      if (
-        (cellValue && this.dragBehavior === 'destroy') ||
-        (!cellValue && this.dragBehavior === 'create')
-      ) {
-        event.target?.addEventListener('mouseleave', this.handleMouseLeave);
-        this.flipCell(row, col);
-      }
-    }
-  }
-
-  handleMouseLeave = () => (this.hoveredCell = null);
-
-  setDragging(desiredState: boolean, row?: number, col?: number) {
-    this.dragging = desiredState;
-    if (this.dragging && row != null && col != null) {
-      this.dragBehavior = this.getCellValue(this.boardMap, row, col)
-        ? 'destroy'
-        : 'create';
-      this.hoveredCell = [row, col];
-      this.flipCell(row, col);
-    }
   }
 }

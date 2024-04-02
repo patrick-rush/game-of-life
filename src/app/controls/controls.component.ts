@@ -13,7 +13,6 @@ export class ControlsComponent {
   @Input({ required: true }) boardSize!: number;
   @Input({ required: true }) interval!: number;
   @Input({ required: true }) colorMode!: boolean;
-  @Input({ required: true }) currentColor!: string;
   @Input({ required: true }) running!: boolean;
 
   @Output() boardSizeChangeEvent = new EventEmitter<number>();
@@ -22,10 +21,9 @@ export class ControlsComponent {
   @Output() startGamePlayEvent = new EventEmitter<void>();
   @Output() stopGamePlayEvent = new EventEmitter<void>();
   @Output() resetGamePlayEvent = new EventEmitter<void>();
-  @Output() randomizeBoardEvent = new EventEmitter<void>();
 
   colorButtonHovered: boolean = false;
-  readonly defaultBoardSize: number = 60;
+  readonly defaultBoardSize: number = 40;
   readonly minBoardSize: number = 20;
   readonly maxBoardSize: number = 100;
   readonly boardSizeStep: number = 2;
@@ -80,10 +78,6 @@ export class ControlsComponent {
 
   handleResetGamePlay() {
     this.resetGamePlayEvent.emit();
-  }
-
-  handleRandomizeBoard() {
-    this.randomizeBoardEvent.emit();
   }
 
   enforceValidNumber(

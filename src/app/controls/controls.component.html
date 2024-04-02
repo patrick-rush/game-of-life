@@ -3,17 +3,12 @@
     <button class="submit" type="submit" hidden></button>
     <button (click)="handleGamePlay()">{{ running ? "Stop" : "Start" }}</button>
     <button (click)="handleResetGamePlay()">Reset</button>
-    <button (click)="handleRandomizeBoard()">Random</button>
     @if (colorMode) {
     <button (click)="handleToggleColorMode()">B&W</button>
     } @else {
     <button
       (click)="handleToggleColorMode()"
-      [ngStyle]="
-        colorButtonHovered
-          ? { 'background-color': currentColor }
-          : { 'background-color': '#ffffff' }
-      "
+      [ngStyle]="{ 'background-color': '#ffffff' }"
       (mouseover)="colorButtonHovered = true"
       (mouseout)="colorButtonHovered = false"
     >
