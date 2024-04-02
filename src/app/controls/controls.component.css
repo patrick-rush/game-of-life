@@ -23,7 +23,6 @@ form {
 button {
     height: 40px;
     width: 9rem;
-    /* margin: 0 10px; */
     font-family: monospace;
     font-size: 16px;
     color: var(--dark);

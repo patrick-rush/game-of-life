@@ -40,6 +40,10 @@ export class GameComponent {
   livingCells: number = 0;
   running: boolean = false;
 
+  dragging: boolean = false;
+  dragBehavior: 'create' | 'destroy' | null = null;
+  hoveredCell: [number, number] | null = null;
+
   constructor(private colorCell: ColorCellPipe) {
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
@@ -78,21 +82,23 @@ export class GameComponent {
     });
   }
 
-  startGame() {
+  startGame(): void {
     this.intervalId = window.setInterval(this.runGame, this.interval);
     this.running = true;
-    console.log('game started');
 
     // benchmarking
     // console.log('living cells at start:', this.livingCells);
     // console.time('game timer');
   }
 
-  stopGame() {
+  pauseGame(): void {
     if (!this.intervalId) return;
     window.clearInterval(this.intervalId);
+  }
+
+  stopGame(): void {
+    this.pauseGame();
     this.running = false;
-    console.log('game stopped');
 
     // benchmarking
     // console.log('living cells at end:', this.livingCells);
@@ -106,12 +112,9 @@ export class GameComponent {
     this.updateLivingCellCount(0);
     this.board = newBoard;
     this.boardMap = newBoardMap;
-    console.log('game reset');
   }
 
   runGame = () => {
-    console.log('game running');
-
     this.iteration++;
     let newCellCount = 0;
     let gameOver = true;
@@ -224,7 +227,7 @@ export class GameComponent {
 
   handleChangeInterval(interval: number) {
     this.interval = interval;
-    this.stopGame();
+    this.pauseGame();
     this.startGame();
   }
 
@@ -243,5 +246,33 @@ export class GameComponent {
       clonedBoard.push(row);
     }
     return [clonedBoard, clonedBoardMap];
+  }
+
+  handleMouseOver(event: MouseEvent, row: number, col: number) {
+    const cellValue = this.getCellValue(this.boardMap, row, col);
+    const [hRow, hCol] = this.hoveredCell || [null, null];
+    if (this.dragging && hRow !== row && hCol !== col) {
+      this.hoveredCell = [row, col];
+      if (
+        (cellValue && this.dragBehavior === 'destroy') ||
+        (!cellValue && this.dragBehavior === 'create')
+      ) {
+        event.target?.addEventListener('mouseleave', this.handleMouseLeave);
+        this.flipCell(row, col);
+      }
+    }
+  }
+
+  handleMouseLeave = () => (this.hoveredCell = null);
+
+  setDragging(desiredState: boolean, row?: number, col?: number) {
+    this.dragging = desiredState;
+    if (this.dragging && row != null && col != null) {
+      this.dragBehavior = this.getCellValue(this.boardMap, row, col)
+        ? 'destroy'
+        : 'create';
+      this.hoveredCell = [row, col];
+      this.flipCell(row, col);
+    }
   }
 }

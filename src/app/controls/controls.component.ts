@@ -25,27 +25,30 @@ export class ControlsComponent {
   @Output() randomizeBoardEvent = new EventEmitter<void>();
 
   colorButtonHovered: boolean = false;
+  readonly defaultBoardSize: number = 60;
   readonly minBoardSize: number = 20;
   readonly maxBoardSize: number = 100;
   readonly boardSizeStep: number = 2;
+  readonly defaultInterval: number = 100;
   readonly minInterval: number = 10;
   readonly maxInterval: number = 200;
   readonly intervalStep: number = 10;
 
   gameForm = new FormGroup({
-    boardSize: new FormControl('60'),
-    interval: new FormControl('100'),
+    boardSize: new FormControl(this.defaultBoardSize),
+    interval: new FormControl(this.defaultInterval),
   });
 
   handleFormSubmit() {
     let { boardSize, interval } = this.gameForm.value;
-    if (boardSize && +boardSize !== this.boardSize)
+    if (boardSize != null && +boardSize !== this.boardSize)
       this.handleBoardSizeChange(+boardSize);
-    if (interval && +interval !== this.interval)
+    if (interval != null && +interval !== this.interval)
       this.handleIntervalChange(+interval);
   }
 
   handleBoardSizeChange(size: number) {
+    if (size === 0) this.boardSize = this.defaultBoardSize;
     this.boardSize = this.enforceValidNumber(
       size,
       this.minBoardSize,
@@ -56,6 +59,7 @@ export class ControlsComponent {
   }
 
   handleIntervalChange(interval: number) {
+    if (interval === 0) this.interval = this.defaultInterval;
     this.interval = this.enforceValidNumber(
       interval,
       this.minInterval,

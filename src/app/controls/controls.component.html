@@ -1,5 +1,6 @@
 <div class="controls">
   <form name="gameForm" [formGroup]="gameForm" (ngSubmit)="handleFormSubmit()">
+    <button class="submit" type="submit" hidden></button>
     <button (click)="handleGamePlay()">{{ running ? "Stop" : "Start" }}</button>
     <button (click)="handleResetGamePlay()">Reset</button>
     <button (click)="handleRandomizeBoard()">Random</button>
