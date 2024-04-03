@@ -1,13 +1,15 @@
 import { CommonModule, NgFor, NgIf, NgStyle } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
 import { LIFE } from '../../constants';
 import { ControlsComponent } from '../controls/controls.component';
 import { DetailsComponent } from '../details/details.component';
+import { DefaultsService } from '../defaults.service';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
+
 @Component({
-  selector: 'app-game',
+  selector: 'app-life',
   standalone: true,
   imports: [
     DetailsComponent,
@@ -19,24 +21,27 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
     NgStyle,
   ],
   providers: [ColorCellPipe],
-  templateUrl: './game.component.html',
-  styleUrl: './game.component.css',
+  templateUrl: './life.component.html',
+  styleUrl: './life.component.css',
 })
-export class GameComponent {
+export class LifeComponent {
   private intervalId: number | null = null;
-  interval: number = 100;
-  boardSize: number = 60; // Board must be a positive, even number
+  interval: number;
+  boardSize: number;
 
   board: [boolean][][];
   boardMap: BoardMap;
 
-  cellSize: string = '14px';
+  cellSize: string;
+  cellSizeDividend: number;
+
   colorMode: boolean = false;
   colorButtonHovered: boolean = false;
   currentColor: string;
 
   iteration: number = 0;
-  maxIterations: number = 999999;
+  maxIterations: number;
+
   livingCells: number = 0;
   running: boolean = false;
 
@@ -44,10 +49,19 @@ export class GameComponent {
   dragBehavior: 'create' | 'destroy' | null = null;
   hoveredCell: [number, number] | null = null;
 
-  constructor(private colorCell: ColorCellPipe) {
+  constructor(
+    private colorCell: ColorCellPipe,
+    @Inject(DefaultsService) private defaults: DefaultsService
+  ) {
+    this.boardSize = defaults.boardSize;
+    this.interval = defaults.interval;
+    this.maxIterations = defaults.maxIterations;
+    this.cellSizeDividend = defaults.cellSizeDividend;
+
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
+    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
     this.writeName();
     this.currentColor = this.updateColor();
   }
@@ -221,7 +235,7 @@ export class GameComponent {
 
   handleChangeBoardSize(size: number) {
     this.boardSize = size;
-    this.cellSize = Math.round(840 / this.boardSize) + 'px';
+    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
     this.resetGame();
   }
 

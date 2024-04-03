@@ -1,20 +1,28 @@
-import { NgStyle } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  Optional,
+  Inject,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { NgStyle } from '@angular/common';
+import { DefaultsService } from '../defaults.service';
 
 @Component({
   selector: 'app-controls',
   standalone: true,
   imports: [NgStyle, ReactiveFormsModule],
   templateUrl: './controls.component.html',
-  styleUrl: './controls.component.css',
+  styleUrls: ['./controls.component.css'],
 })
 export class ControlsComponent {
-  @Input({ required: true }) boardSize!: number;
-  @Input({ required: true }) interval!: number;
-  @Input({ required: true }) colorMode!: boolean;
-  @Input({ required: true }) currentColor!: string;
-  @Input({ required: true }) running!: boolean;
+  @Input() boardSize!: number;
+  @Input() interval!: number;
+  @Input() colorMode?: boolean;
+  @Input() currentColor?: string;
+  @Input() running!: boolean;
 
   @Output() boardSizeChangeEvent = new EventEmitter<number>();
   @Output() intervalChangeEvent = new EventEmitter<number>();
@@ -25,19 +33,29 @@ export class ControlsComponent {
   @Output() randomizeBoardEvent = new EventEmitter<void>();
 
   colorButtonHovered: boolean = false;
-  readonly defaultBoardSize: number = 60;
-  readonly minBoardSize: number = 20;
+  gameForm: FormGroup;
+
+  defaultBoardSize: number;
+  readonly minBoardSize: number = 10;
   readonly maxBoardSize: number = 100;
   readonly boardSizeStep: number = 2;
-  readonly defaultInterval: number = 100;
+
+  defaultInterval: number;
   readonly minInterval: number = 10;
   readonly maxInterval: number = 200;
   readonly intervalStep: number = 10;
 
-  gameForm = new FormGroup({
-    boardSize: new FormControl(this.defaultBoardSize),
-    interval: new FormControl(this.defaultInterval),
-  });
+  constructor(@Inject(DefaultsService) private defaults: DefaultsService) {
+    this.defaultBoardSize = defaults.boardSize;
+    this.defaultInterval = defaults.interval;
+    this.gameForm = new FormGroup({
+      boardSize: new FormControl(this.defaultBoardSize),
+      interval: new FormControl(this.defaultInterval),
+    });
+  }
+
+  // Methods from both components remain largely unchanged
+  // Include conditional checks for game-specific features where necessary
 
   handleFormSubmit() {
     let { boardSize, interval } = this.gameForm.value;
