@@ -1,6 +1,7 @@
 import { NgStyle } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { GameComponent } from '../game/game.component';
 
 @Component({
   selector: 'app-controls',
@@ -22,20 +23,27 @@ export class ControlsComponent {
   @Output() stopGamePlayEvent = new EventEmitter<void>();
   @Output() resetGamePlayEvent = new EventEmitter<void>();
 
-  colorButtonHovered: boolean = false;
-  readonly defaultBoardSize: number = 70;
-  readonly minBoardSize: number = 20;
-  readonly maxBoardSize: number = 100;
+  defaultBoardSize: number;
+  readonly minBoardSize: number = 10;
+  readonly maxBoardSize: number = 60;
   readonly boardSizeStep: number = 2;
-  readonly defaultInterval: number = 100;
+
+  defaultInterval: number;
   readonly minInterval: number = 10;
   readonly maxInterval: number = 200;
   readonly intervalStep: number = 10;
 
-  gameForm = new FormGroup({
-    boardSize: new FormControl(this.defaultBoardSize),
-    interval: new FormControl(this.defaultInterval),
-  });
+  colorButtonHovered: boolean = false;
+  gameForm: FormGroup;
+
+  constructor(@Inject(GameComponent) private gameComponent: GameComponent) {
+    this.defaultBoardSize = gameComponent.boardSize;
+    this.defaultInterval = gameComponent.interval;
+    this.gameForm = new FormGroup({
+      boardSize: new FormControl(this.defaultBoardSize),
+      interval: new FormControl(this.defaultInterval),
+    });
+  }
 
   handleFormSubmit() {
     let { boardSize, interval } = this.gameForm.value;

@@ -17,8 +17,8 @@
   <div>
     <div class="board">
       <div *ngFor="let row of board; let rowIndex = index">
-        <div *ngFor="let cell of row; let colIndex = index">
-          <div
+        <ul *ngFor="let cell of row; let colIndex = index">
+          <li
             *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 0"
             class="cell rock"
             [ngStyle]="{
@@ -26,8 +26,8 @@
               height: cellSize,
               backgroundColor: rockColor
             }"
-          ></div>
-          <div
+          ></li>
+          <li
             *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 1"
             class="cell paper"
             [ngStyle]="{
@@ -35,8 +35,8 @@
               height: cellSize,
               backgroundColor: paperColor
             }"
-          ></div>
-          <div
+          ></li>
+          <li
             *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 2"
             class="cell scissors"
             [ngStyle]="{
@@ -44,8 +44,8 @@
               height: cellSize,
               backgroundColor: scissorsColor
             }"
-          ></div>
-        </div>
+          ></li>
+        </ul>
       </div>
     </div>
   </div>

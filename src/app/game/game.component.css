@@ -25,6 +25,22 @@
     height: auto;
 }
 
+ul {
+    margin-block-end: 0%;
+    margin-block-start: 0%;
+    padding: 0;
+}
+
+li {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.row {
+    width: auto;
+    padding: 0;
+}
+
 .cell {
     width: 14px;
     height: 14px;

@@ -31,12 +31,13 @@ type BoardMap = Map<number, Map<number, [CellState]>>;
 export class GameComponent {
   private intervalId: number | null = null;
   interval: number = 100;
-  boardSize: number = 70; // Board must be a positive, even number
+  boardSize: number = 40; // Board must be a positive, even number
 
   board: [CellState][][];
   boardMap: BoardMap;
 
-  cellSize: string = '10px';
+  cellSize: string;
+  cellSizeDividend: number = 750;
   colorMode: boolean = false;
   colorButtonHovered: boolean = false;
 
@@ -53,6 +54,7 @@ export class GameComponent {
 
   constructor() {
     const [newBoard, newBoardMap] = this.generateBoard();
+    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
     this.board = newBoard;
     this.boardMap = newBoardMap;
     const [rockColor, paperColor, scissorsColor] = this.toggleColorMode();
@@ -84,7 +86,7 @@ export class GameComponent {
     this.running = true;
 
     // benchmarking
-    // console.log('living cells at start:', this.livingCells);
+    // this.maxIterations = 100;
     // console.time('game timer');
   }
 
@@ -98,7 +100,6 @@ export class GameComponent {
     this.running = false;
 
     // benchmarking
-    // console.log('living cells at end:', this.livingCells);
     // console.timeEnd('game timer');
   }
 
@@ -138,6 +139,8 @@ export class GameComponent {
     this.rockCount = rock;
     this.paperCount = paper;
     this.scissorsCount = scissors;
+
+    if (this.iteration >= this.maxIterations) this.stopGame();
   };
 
   tallyNeighbors(
@@ -199,14 +202,13 @@ export class GameComponent {
     this.rockColor = '#' + genRanHex(6);
     this.paperColor = '#' + genRanHex(6);
     this.scissorsColor = '#' + genRanHex(6);
-    console.log(this.paperColor);
     this.colorMode = !this.colorMode;
     return [this.rockColor, this.paperColor, this.scissorsColor];
   }
 
   handleChangeBoardSize(size: number) {
     this.boardSize = size;
-    this.cellSize = Math.round(750 / this.boardSize) + 'px';
+    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
     this.resetGame();
   }
 
