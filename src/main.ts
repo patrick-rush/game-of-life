@@ -8,9 +8,7 @@ const prod = environment.prod;
 inject({ mode: prod ? 'production' : 'development' });
 
 (function () {
-  prod
-    ? console.log('production environment')
-    : console.log('development environment');
+  prod ? console.log('✨') : console.log('⛓️');
 })();
 
 bootstrapApplication(AppComponent, appConfig).catch((err) =>
