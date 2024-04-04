@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgStyle } from '@angular/common';
 import { DefaultsService } from '../defaults.service';
 import { Game } from '../defaults.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-controls',
@@ -12,6 +13,7 @@ import { Game } from '../defaults.service';
   styleUrls: ['./controls.component.css'],
 })
 export class ControlsComponent {
+  @Input() activeGame!: Game;
   @Input() boardSize!: number;
   @Input() interval!: number;
   @Input() colorMode?: boolean;
@@ -26,34 +28,38 @@ export class ControlsComponent {
   @Output() resetGamePlayEvent = new EventEmitter<void>();
   @Output() randomizeBoardEvent = new EventEmitter<void>();
 
-  activeGame: Game;
   colorButtonHovered: boolean = false;
   gameForm: FormGroup;
 
   defaultBoardSize: number;
-  readonly minBoardSize: number = 10;
-  readonly maxBoardSize: number = 100;
+  minBoardSize: number;
+  maxBoardSize: number;
   readonly boardSizeStep: number = 2;
 
   defaultInterval: number;
-  readonly minInterval: number = 10;
-  readonly maxInterval: number = 200;
+  minInterval: number;
+  maxInterval: number;
   readonly intervalStep: number = 10;
 
   randomColor: string;
-  toggleActiveGame: (game: Game) => void;
 
-  constructor(@Inject(DefaultsService) private defaults: DefaultsService) {
-    this.activeGame = defaults.activeGame;
+  constructor(
+    @Inject(DefaultsService) private defaults: DefaultsService,
+    private router: Router
+  ) {
     this.defaultBoardSize = defaults.boardSize;
     this.defaultInterval = defaults.interval;
-    this.toggleActiveGame = defaults.toggleActiveGame;
+    this.minBoardSize = defaults.minBoardSize;
+    this.maxBoardSize = defaults.maxBoardSize;
+    this.minInterval = defaults.minInterval;
+    this.maxInterval = defaults.maxInterval;
+
     this.gameForm = new FormGroup({
       boardSize: new FormControl(this.defaultBoardSize),
       interval: new FormControl(this.defaultInterval),
     });
+
     this.randomColor = this.genRanHex(6);
-    console.log('randomColor:', this.randomColor);
   }
 
   handleFormSubmit() {
@@ -101,6 +107,12 @@ export class ControlsComponent {
 
   handleRandomizeBoard() {
     this.randomizeBoardEvent.emit();
+  }
+
+  toggleActiveGame() {
+    console.log(this.activeGame);
+    this.activeGame = this.activeGame === Game.LIFE ? Game.RPS : Game.LIFE;
+    this.router.navigate([this.activeGame]);
   }
 
   enforceValidNumber(

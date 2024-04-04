@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { DefaultsService } from '../defaults.service';
-import { Subscription } from 'rxjs';
+import { DefaultsService, Game } from '../defaults.service';
 
 @Component({
   selector: 'app-base-game',
@@ -11,64 +10,32 @@ import { Subscription } from 'rxjs';
 })
 export abstract class BaseGameComponent {
   protected intervalId: number | null = null;
-  activeGame: string;
-  interval: number;
-  boardSize: number;
-
+  abstract activeGame: Game;
   abstract board: [unknown][][];
   abstract boardMap: Map<number, Map<number, [unknown]>>;
 
+  interval: number;
+  boardSize: number;
   colorMode: boolean = false;
   cellSize: string;
   cellSizeDividend: number;
-
   iteration: number = 0;
   maxIterations: number;
-
   running: boolean = false;
 
-  subscription: Subscription | null = null;
-
-  // @ts-ignore
   constructor(@Inject(DefaultsService) protected defaults: DefaultsService) {
     this.boardSize = defaults.boardSize;
     this.interval = defaults.interval;
     this.maxIterations = defaults.maxIterations;
     this.cellSizeDividend = defaults.cellSizeDividend;
     this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
-    this.activeGame = defaults.activeGame;
-  }
-
-  ngOnInit() {
-    this.subscription = this.defaults.defaultGame$.subscribe((game) => {
-      this.activeGame = game;
-    });
   }
 
   ngOnDestroy() {
-    this.subscription?.unsubscribe();
+    this.stopGame();
   }
 
   abstract generateBoard(): void;
-
-  startGame(): void {
-    this.intervalId = window.setInterval(this.runGame, this.interval);
-    this.running = true;
-  }
-
-  pauseGame(): void {
-    if (!this.intervalId) return;
-    window.clearInterval(this.intervalId);
-  }
-
-  stopGame(): void {
-    this.pauseGame();
-    this.running = false;
-
-    // benchmarking
-    // console.log('living cells at end:', this.livingCells);
-    // console.timeEnd('game timer');
-  }
 
   abstract resetGame(): void;
 
@@ -79,6 +46,32 @@ export abstract class BaseGameComponent {
     col: number,
     row: number
   ): R;
+
+  abstract getCellStyle(col: number, row: number): string;
+
+  startGame(): void {
+    this.intervalId = window.setInterval(this.runGame, this.interval);
+    this.running = true;
+    console.log('Game started');
+
+    // benchmarking
+    // console.time('game timer');
+  }
+
+  pauseGame(): void {
+    if (!this.intervalId) return;
+    window.clearInterval(this.intervalId);
+    console.log('Game paused');
+  }
+
+  stopGame(): void {
+    this.pauseGame();
+    this.running = false;
+    console.log('Game stopped');
+
+    // benchmarking
+    // console.timeEnd('game timer');
+  }
 
   getCell<T>(
     board: Map<number, Map<number, [T]>>,

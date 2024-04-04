@@ -6,6 +6,7 @@ import { ControlsComponent } from '../controls/controls.component';
 import { DetailsComponent } from '../details/details.component';
 import { DefaultsService } from '../defaults.service';
 import { BaseGameComponent } from '../base-game/base-game.component';
+import { Game } from '../defaults.service';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
 
@@ -27,6 +28,7 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
 })
 export class LifeComponent extends BaseGameComponent {
   protected override intervalId: number | null = null;
+  readonly activeGame: Game = Game.LIFE;
 
   board: [boolean][][];
   boardMap: BoardMap;
@@ -93,8 +95,7 @@ export class LifeComponent extends BaseGameComponent {
   }
 
   runGame = () => {
-    if (this.activeGame !== 'life') this.stopGame();
-    console.log('running');
+    console.log('Game running');
     this.iteration++;
     let newCellCount = 0;
     let gameOver = true;
@@ -123,7 +124,6 @@ export class LifeComponent extends BaseGameComponent {
         if (activeCell[0]) newCellCount++;
       });
     });
-    if (gameOver) console.log('gameOver', gameOver);
     if (gameOver || this.iteration === this.maxIterations) this.stopGame();
     this.updateLivingCellCount(newCellCount);
   };
@@ -246,6 +246,17 @@ export class LifeComponent extends BaseGameComponent {
         : 'create';
       this.hoveredCell = [col, row];
       this.flipCell(col, row);
+    }
+  }
+
+  getCellStyle(colIndex: number, rowIndex: number): string {
+    const cellValue = this.getCellValue(this.boardMap, colIndex, rowIndex);
+    if (!cellValue) {
+      return 'var(--light)';
+    } else if (this.colorMode) {
+      return this.currentColor;
+    } else {
+      return 'var(--dark)';
     }
   }
 }

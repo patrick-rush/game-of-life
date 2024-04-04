@@ -3,8 +3,9 @@ import { Component, Inject } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
 import { ControlsComponent } from '../controls/controls.component';
 import { DetailsComponent } from '../details/details.component';
-import { DefaultsService } from '../defaults.service';
+import { DefaultsService, Game } from '../defaults.service';
 import { BaseGameComponent } from '../base-game/base-game.component';
+import { RPS } from '../../constants';
 
 enum CellState {
   ROCK,
@@ -38,6 +39,7 @@ type BoardMap = Map<number, Map<number, [CellState]>>;
 })
 export class RpsComponent extends BaseGameComponent {
   protected override intervalId: number | null = null;
+  readonly activeGame: Game = Game.RPS;
 
   board: [CellState][][];
   boardMap: BoardMap;
@@ -64,6 +66,8 @@ export class RpsComponent extends BaseGameComponent {
     this.rockColor = rockColor;
     this.paperColor = paperColor;
     this.scissorsColor = scissorsColor;
+
+    this.writeName();
   }
 
   generateBoard(): [[CellState][][], BoardMap] {
@@ -93,8 +97,7 @@ export class RpsComponent extends BaseGameComponent {
   }
 
   runGame = () => {
-    if (this.activeGame !== 'rps') this.stopGame();
-    console.log('running');
+    console.log('Game running');
     this.iteration++;
     let rock = 0;
     let paper = 0;
@@ -179,5 +182,34 @@ export class RpsComponent extends BaseGameComponent {
     this.scissorsColor = '#' + genRanHex(6);
     this.colorMode = !this.colorMode;
     return [this.rockColor, this.paperColor, this.scissorsColor];
+  }
+
+  writeName() {
+    const boardHeightReference = Math.round(this.boardSize / 2);
+    const boardWidthReference = Math.round(this.boardSize / 3);
+    const negativeCol = RPS[0].length;
+    const negativeRow = RPS.length;
+    const minH = Math.round(boardHeightReference - negativeRow / 2);
+    const minW = Math.round(boardWidthReference - negativeRow / 3);
+    for (let col = 0; col < negativeCol; col++) {
+      for (let row = 0; row < negativeRow; row++) {
+        const cell = RPS[row][col];
+        if (cell !== 3) {
+          this.getCell(this.boardMap, col + minW, row + minH)[0] = cell;
+        }
+      }
+    }
+  }
+
+  getCellStyle(col: number, row: number): string {
+    const cell = this.getCellValue(this.boardMap, col, row);
+    switch (cell) {
+      case CellState.ROCK:
+        return this.rockColor;
+      case CellState.PAPER:
+        return this.paperColor;
+      case CellState.SCISSORS:
+        return this.scissorsColor;
+    }
   }
 }

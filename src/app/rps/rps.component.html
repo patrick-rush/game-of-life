@@ -1,6 +1,7 @@
 <div class="game">
   <div class="header">
     <app-controls
+      [activeGame]="activeGame"
       [boardSize]="boardSize"
       [interval]="interval"
       [running]="running"
@@ -18,30 +19,11 @@
       <div *ngFor="let row of board; let rowIndex = index">
         <ul *ngFor="let cell of row; let colIndex = index">
           <li
-            *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 0"
-            class="cell rock"
+            class="cell"
             [ngStyle]="{
               width: cellSize,
               height: cellSize,
-              backgroundColor: rockColor
-            }"
-          ></li>
-          <li
-            *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 1"
-            class="cell paper"
-            [ngStyle]="{
-              width: cellSize,
-              height: cellSize,
-              backgroundColor: paperColor
-            }"
-          ></li>
-          <li
-            *ngIf="getCellValue(boardMap, rowIndex, colIndex) === 2"
-            class="cell scissors"
-            [ngStyle]="{
-              width: cellSize,
-              height: cellSize,
-              backgroundColor: scissorsColor
+              backgroundColor: getCellStyle(rowIndex, colIndex)
             }"
           ></li>
         </ul>

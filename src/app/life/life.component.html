@@ -1,6 +1,7 @@
 <div class="game">
   <div class="header">
     <app-controls
+      [activeGame]="activeGame"
       [boardSize]="boardSize"
       [interval]="interval"
       [colorMode]="colorMode"
@@ -18,11 +19,11 @@
   </div>
   <div>
     <div
+      *ngIf="!running"
       (mouseup)="setDragging($event, false)"
       (mouseleave)="setDragging($event, false)"
     >
       <div
-        *ngIf="!running"
         class="board"
         (mousedown)="setDragging($event, true)"
         (mouseover)="dragging && handleMouseOver($event)"
@@ -37,47 +38,27 @@
             [attr.data-row]="rowIndex"
           >
             <div
-              *ngIf="!getCellValue(boardMap, colIndex, rowIndex)"
-              class="cell light"
-              [ngStyle]="{ width: cellSize, height: cellSize }"
-            ></div>
-            <div
-              *ngIf="getCellValue(boardMap, colIndex, rowIndex) && !colorMode"
-              class="cell dark"
-              [ngStyle]="{ width: cellSize, height: cellSize }"
-            ></div>
-            <div
-              *ngIf="getCellValue(boardMap, colIndex, rowIndex) && colorMode"
               class="cell"
               [ngStyle]="{
-                'background-color': currentColor,
+                width: cellSize,
                 height: cellSize,
-                width: cellSize
+                'background-color': getCellStyle(colIndex, rowIndex)
               }"
             ></div>
           </div>
         </div>
       </div>
+    </div>
+    <div>
       <div *ngIf="running" class="board">
         <div *ngFor="let col of board; let colIndex = index">
           <div *ngFor="let cell of col; let rowIndex = index">
             <div
-              *ngIf="!getCellValue(boardMap, colIndex, rowIndex)"
-              class="cell light"
-              [ngStyle]="{ width: cellSize, height: cellSize }"
-            ></div>
-            <div
-              *ngIf="getCellValue(boardMap, colIndex, rowIndex) && !colorMode"
-              class="cell dark"
-              [ngStyle]="{ width: cellSize, height: cellSize }"
-            ></div>
-            <div
-              *ngIf="getCellValue(boardMap, colIndex, rowIndex) && colorMode"
               class="cell"
               [ngStyle]="{
-                'background-color': currentColor,
+                width: cellSize,
                 height: cellSize,
-                width: cellSize
+                'background-color': getCellStyle(colIndex, rowIndex)
               }"
             ></div>
           </div>
@@ -85,5 +66,6 @@
       </div>
     </div>
   </div>
+  <!-- div for bottom spacing -->
   <div></div>
 </div>
