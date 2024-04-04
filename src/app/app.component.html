@@ -1,8 +1,11 @@
 <main class="main">
   <title>{{ title }}</title>
   <div class="content">
-    <!-- <app-rps class="game" /> -->
+    @if (activeGame === 'rps') {
+    <app-rps class="game" />
+    } @if (activeGame === 'life') {
     <app-life class="game" />
+    }
     <div class="mobile-message">
       We're sorry, but this application is currently optimized for larger
       screens. Please use a device with a larger screen to enjoy the game.

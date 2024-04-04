@@ -5,6 +5,7 @@ import { LIFE } from '../../constants';
 import { ControlsComponent } from '../controls/controls.component';
 import { DetailsComponent } from '../details/details.component';
 import { DefaultsService } from '../defaults.service';
+import { BaseGameComponent } from '../base-game/base-game.component';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
 
@@ -24,26 +25,16 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
   templateUrl: './life.component.html',
   styleUrl: './life.component.css',
 })
-export class LifeComponent {
-  private intervalId: number | null = null;
-  interval: number;
-  boardSize: number;
+export class LifeComponent extends BaseGameComponent {
+  protected override intervalId: number | null = null;
 
   board: [boolean][][];
   boardMap: BoardMap;
 
-  cellSize: string;
-  cellSizeDividend: number;
-
-  colorMode: boolean = false;
   colorButtonHovered: boolean = false;
   currentColor: string;
 
-  iteration: number = 0;
-  maxIterations: number;
-
   livingCells: number = 0;
-  running: boolean = false;
 
   dragging: boolean = false;
   dragBehavior: 'create' | 'destroy' | null = null;
@@ -51,17 +42,13 @@ export class LifeComponent {
 
   constructor(
     private colorCell: ColorCellPipe,
-    @Inject(DefaultsService) private defaults: DefaultsService
+    @Inject(DefaultsService) protected override defaults: DefaultsService
   ) {
-    this.boardSize = defaults.boardSize;
-    this.interval = defaults.interval;
-    this.maxIterations = defaults.maxIterations;
-    this.cellSizeDividend = defaults.cellSizeDividend;
+    super(defaults);
 
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
-    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
     this.writeName();
     this.currentColor = this.updateColor();
   }
@@ -96,29 +83,6 @@ export class LifeComponent {
     });
   }
 
-  startGame(): void {
-    this.intervalId = window.setInterval(this.runGame, this.interval);
-    this.running = true;
-
-    // benchmarking
-    // console.log('living cells at start:', this.livingCells);
-    // console.time('game timer');
-  }
-
-  pauseGame(): void {
-    if (!this.intervalId) return;
-    window.clearInterval(this.intervalId);
-  }
-
-  stopGame(): void {
-    this.pauseGame();
-    this.running = false;
-
-    // benchmarking
-    // console.log('living cells at end:', this.livingCells);
-    // console.timeEnd('game timer');
-  }
-
   resetGame() {
     this.stopGame();
     const [newBoard, newBoardMap] = this.generateBoard();
@@ -132,12 +96,16 @@ export class LifeComponent {
     this.iteration++;
     let newCellCount = 0;
     let gameOver = true;
-    const [boardClone, boardMapClone] = this.cloneBoard();
+    const [boardClone, boardMapClone] = this.cloneBoard<boolean>();
 
     boardClone.forEach((row, i) => {
       row.forEach((cell, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
-        const neighbors = this.getLiveNeighborCount(boardMapClone, i, j);
+        const neighbors = this.tallyNeighbors<boolean, number>(
+          boardMapClone as BoardMap,
+          i,
+          j
+        );
         if (cell[0]) {
           gameOver = false;
           if (neighbors < 2 || neighbors > 3) {
@@ -170,7 +138,11 @@ export class LifeComponent {
     else this.updateLivingCellCount(-1);
   }
 
-  getLiveNeighborCount(boardMap: BoardMap, row: number, col: number): number {
+  tallyNeighbors<T, R>(
+    boardMap: Map<number, Map<number, [T]>>,
+    row: number,
+    col: number
+  ): R {
     let liveNeighbors: number = 0;
     for (let r = row - 1, rr = row + 1; r <= rr; r++) {
       for (let c = col - 1, cc = col + 1; c <= cc; c++) {
@@ -185,15 +157,7 @@ export class LifeComponent {
       }
     }
 
-    return liveNeighbors;
-  }
-
-  getCell(board: BoardMap, row: number, col: number): [boolean] {
-    return board.get(row)?.get(col)!;
-  }
-
-  getCellValue(board: BoardMap, row: number, col: number): boolean {
-    return this.getCell(board, row, col)[0]!;
+    return liveNeighbors as R;
   }
 
   toggleColorMode() {
@@ -231,35 +195,6 @@ export class LifeComponent {
     const color = this.colorCell.transform(this.livingCells, this.boardSize);
     this.currentColor = color;
     return color;
-  }
-
-  handleChangeBoardSize(size: number) {
-    this.boardSize = size;
-    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
-    this.resetGame();
-  }
-
-  handleChangeInterval(interval: number) {
-    this.interval = interval;
-    this.pauseGame();
-    this.startGame();
-  }
-
-  cloneBoard(): [[boolean][][], BoardMap] {
-    const clonedBoard: [boolean][][] = [];
-    const clonedBoardMap: BoardMap = new Map();
-    for (let i = 0; i < this.boardSize; i++) {
-      const row: [boolean][] = [];
-      const rowMap = new Map<number, [boolean]>();
-      for (let j = 0; j < this.boardSize; j++) {
-        const cell: [boolean] = [this.board[i][j][0]];
-        rowMap.set(j, cell);
-        row.push(cell);
-      }
-      clonedBoardMap.set(i, rowMap);
-      clonedBoard.push(row);
-    }
-    return [clonedBoard, clonedBoardMap];
   }
 
   handleMouseOver(event: MouseEvent, row: number, col: number) {

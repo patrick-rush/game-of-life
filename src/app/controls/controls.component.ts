@@ -1,14 +1,8 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  Optional,
-  Inject,
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output, Inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgStyle } from '@angular/common';
 import { DefaultsService } from '../defaults.service';
+import { Game } from '../defaults.service';
 
 @Component({
   selector: 'app-controls',
@@ -32,6 +26,7 @@ export class ControlsComponent {
   @Output() resetGamePlayEvent = new EventEmitter<void>();
   @Output() randomizeBoardEvent = new EventEmitter<void>();
 
+  activeGame: Game;
   colorButtonHovered: boolean = false;
   gameForm: FormGroup;
 
@@ -45,17 +40,21 @@ export class ControlsComponent {
   readonly maxInterval: number = 200;
   readonly intervalStep: number = 10;
 
+  randomColor: string;
+  toggleActiveGame: (game: Game) => void;
+
   constructor(@Inject(DefaultsService) private defaults: DefaultsService) {
+    this.activeGame = defaults.activeGame;
     this.defaultBoardSize = defaults.boardSize;
     this.defaultInterval = defaults.interval;
+    this.toggleActiveGame = defaults.toggleActiveGame;
     this.gameForm = new FormGroup({
       boardSize: new FormControl(this.defaultBoardSize),
       interval: new FormControl(this.defaultInterval),
     });
+    this.randomColor = this.genRanHex(6);
+    console.log('randomColor:', this.randomColor);
   }
-
-  // Methods from both components remain largely unchanged
-  // Include conditional checks for game-specific features where necessary
 
   handleFormSubmit() {
     let { boardSize, interval } = this.gameForm.value;
@@ -115,4 +114,9 @@ export class ControlsComponent {
     if (input < min) return min;
     return input % step === 0 ? input : Math.ceil(input / step) * step;
   }
+
+  genRanHex = (size: number) =>
+    [...Array(size)]
+      .map(() => Math.floor(Math.random() * 16).toString(16))
+      .join('');
 }

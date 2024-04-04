@@ -49,5 +49,19 @@
         title="Value from {{ minInterval }} to {{ maxInterval }}"
       />
     </div>
+    <button
+      class="game-toggle"
+      (click)="toggleActiveGame(activeGame)"
+      title="Switch Games"
+    >
+      @if (activeGame === 'rps') {
+      <div class="cell"></div>
+      } @else if (activeGame === 'life') {
+      <div
+        class="circle"
+        [ngStyle]="{ 'background-color': '#' + randomColor }"
+      ></div>
+      }
+    </button>
   </form>
 </div>
