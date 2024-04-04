@@ -1,0 +1,34 @@
+<div class="game">
+  <div class="header">
+    <app-controls
+      [activeGame]="activeGame"
+      [boardSize]="boardSize"
+      [interval]="interval"
+      [running]="running"
+      (boardSizeChangeEvent)="handleChangeBoardSize($event)"
+      (intervalChangeEvent)="handleChangeInterval($event)"
+      (toggleColorModeEvent)="toggleColorMode()"
+      (startGamePlayEvent)="startGame()"
+      (stopGamePlayEvent)="stopGame()"
+      (resetGamePlayEvent)="resetGame()"
+    />
+    <app-details [iteration]="iteration" />
+  </div>
+  <div>
+    <div class="board">
+      <div *ngFor="let row of board; let rowIndex = index">
+        <ul *ngFor="let cell of row; let colIndex = index">
+          <li
+            class="cell"
+            [ngStyle]="{
+              width: cellSize,
+              height: cellSize,
+              backgroundColor: getCellStyle(rowIndex, colIndex)
+            }"
+          ></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div></div>
+</div>

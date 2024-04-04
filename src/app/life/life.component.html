@@ -1,0 +1,71 @@
+<div class="game">
+  <div class="header">
+    <app-controls
+      [activeGame]="activeGame"
+      [boardSize]="boardSize"
+      [interval]="interval"
+      [colorMode]="colorMode"
+      [currentColor]="currentColor"
+      [running]="running"
+      (boardSizeChangeEvent)="handleChangeBoardSize($event)"
+      (intervalChangeEvent)="handleChangeInterval($event)"
+      (toggleColorModeEvent)="toggleColorMode()"
+      (startGamePlayEvent)="startGame()"
+      (stopGamePlayEvent)="stopGame()"
+      (resetGamePlayEvent)="resetGame()"
+      (randomizeBoardEvent)="randomizeBoard()"
+    />
+    <app-details [iteration]="iteration" [livingCells]="livingCells" />
+  </div>
+  <div>
+    <div
+      *ngIf="!running"
+      (mouseup)="setDragging($event, false)"
+      (mouseleave)="setDragging($event, false)"
+    >
+      <div
+        class="board"
+        (mousedown)="setDragging($event, true)"
+        (mouseover)="dragging && handleMouseOver($event)"
+        (mouseleave)="dragging && handleMouseLeave()"
+      >
+        <div
+          *ngFor="let col of board; let colIndex = index"
+          [attr.data-col]="colIndex"
+        >
+          <div
+            *ngFor="let cell of col; let rowIndex = index"
+            [attr.data-row]="rowIndex"
+          >
+            <div
+              class="cell"
+              [ngStyle]="{
+                width: cellSize,
+                height: cellSize,
+                'background-color': getCellStyle(colIndex, rowIndex)
+              }"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div *ngIf="running" class="board">
+        <div *ngFor="let col of board; let colIndex = index">
+          <div *ngFor="let cell of col; let rowIndex = index">
+            <div
+              class="cell"
+              [ngStyle]="{
+                width: cellSize,
+                height: cellSize,
+                'background-color': getCellStyle(colIndex, rowIndex)
+              }"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- div for bottom spacing -->
+  <div></div>
+</div>

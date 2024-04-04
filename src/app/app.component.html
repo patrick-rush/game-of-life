@@ -1,12 +1,10 @@
 <main class="main">
   <title>{{ title }}</title>
   <div class="content">
-    <app-game class="game" />
+    <router-outlet />
     <div class="mobile-message">
       We're sorry, but this application is currently optimized for larger
       screens. Please use a device with a larger screen to enjoy the game.
     </div>
   </div>
 </main>
-
-<router-outlet />

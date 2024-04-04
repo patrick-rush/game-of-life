@@ -1,72 +1,101 @@
 :host {
-    --black: #101010;
-    --white: #ffffff;
-    
-    --dark: var(--black);
-    --light: var(--white)
+  --black: #101010;
+  --white: #ffffff;
+
+  --dark: var(--black);
+  --light: var(--white);
 }
 
 .controls {
-    display: flex;
-    align-items: center;
-    padding-top: 1rem;
+  display: flex;
+  align-items: center;
+  padding-top: 1rem;
 }
 
 form {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
 
 button {
-    height: 40px;
-    width: 9rem;
-    font-family: monospace;
-    font-size: 16px;
-    color: var(--dark);
-    background-color: var(--light);
-    border: 1px solid var(--dark);
-    border-radius: 5px;
-    cursor: pointer;
+  height: 40px;
+  width: 9rem;
+  font-family: monospace;
+  font-size: 16px;
+  color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid var(--dark);
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
-    background-color: var(--dark);
-    color: var(--light);
-    border: 1px solid var(--light);
+  background-color: var(--dark);
+  color: var(--light);
+  border: 1px solid var(--light);
+}
+
+button.game-toggle {
+  display: flex;
+  height: 40px;
+  width: 40px;
+  justify-content: center;
+  align-items: center;
+
+  font-family: monospace;
+  font-size: 16px;
+  color: var(--dark);
+  background-color: var(--light);
+  border: 1px solid var(--dark);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cell {
+  width: 18px;
+  height: 18px;
+  border-radius: 10%;
+  background-color: var(--dark);
+}
+
+.circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
 }
 
 .pill {
-    height: 38px;;
-    width: 9rem;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    font-family: monospace;
-    font-size: 16px;
-    background-color: var(--light);
-    border: 1px solid var(--dark);
-    border-radius: 5px;
+  height: 38px;
+  width: 9rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-family: monospace;
+  font-size: 16px;
+  background-color: var(--light);
+  border: 1px solid var(--dark);
+  border-radius: 5px;
 }
 
 label {
-    padding: 0 0.5rem;
-    color: var(--dark);
+  padding: 0 0.5rem;
+  color: var(--dark);
 }
 
 input {
-    text-align: center;
-    height: auto;
-    width: auto;
-    font-family: monospace;
-    font-size: 16px;
-    border: none;
+  text-align: center;
+  height: auto;
+  width: auto;
+  font-family: monospace;
+  font-size: 16px;
+  border: none;
 }
 
-input[type='number']::-webkit-inner-spin-button, 
-input[type='number']::-webkit-outer-spin-button { 
-    -webkit-appearance: none;
-    margin: 0;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

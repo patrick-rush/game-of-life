@@ -1,13 +1,17 @@
 import { CommonModule, NgFor, NgIf, NgStyle } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { ColorCellPipe } from '../color-cell.pipe';
 import { LIFE } from '../../constants';
 import { ControlsComponent } from '../controls/controls.component';
 import { DetailsComponent } from '../details/details.component';
+import { DefaultsService } from '../defaults.service';
+import { BaseGameComponent } from '../base-game/base-game.component';
+import { Game } from '../defaults.service';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
+
 @Component({
-  selector: 'app-game',
+  selector: 'app-life',
   standalone: true,
   imports: [
     DetailsComponent,
@@ -19,32 +23,31 @@ type BoardMap = Map<number, Map<number, [boolean]>>;
     NgStyle,
   ],
   providers: [ColorCellPipe],
-  templateUrl: './game.component.html',
-  styleUrl: './game.component.css',
+  templateUrl: './life.component.html',
+  styleUrl: './life.component.css',
 })
-export class GameComponent {
-  private intervalId: number | null = null;
-  interval: number = 100;
-  boardSize: number = 60; // Board must be a positive, even number
+export class LifeComponent extends BaseGameComponent {
+  protected override intervalId: number | null = null;
+  readonly activeGame: Game = Game.LIFE;
 
   board: [boolean][][];
   boardMap: BoardMap;
 
-  cellSize: string = '14px';
-  colorMode: boolean = false;
   colorButtonHovered: boolean = false;
   currentColor: string;
 
-  iteration: number = 0;
-  maxIterations: number = 999999;
   livingCells: number = 0;
-  running: boolean = false;
 
   dragging: boolean = false;
   dragBehavior: 'create' | 'destroy' | null = null;
   hoveredCell: [number, number] | null = null;
 
-  constructor(private colorCell: ColorCellPipe) {
+  constructor(
+    private colorCell: ColorCellPipe,
+    @Inject(DefaultsService) protected override defaults: DefaultsService
+  ) {
+    super(defaults);
+
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
@@ -56,15 +59,15 @@ export class GameComponent {
     const newBoard: [boolean][][] = [];
     const newBoardMap: BoardMap = new Map();
     for (let i = 0; i < this.boardSize; i++) {
-      const row: [boolean][] = [];
-      const rowMap = new Map<number, [boolean]>();
+      const col: [boolean][] = [];
+      const colMap = new Map<number, [boolean]>();
       for (let j = 0; j < this.boardSize; j++) {
         const cell: [boolean] = [false];
-        rowMap.set(j, cell);
-        row.push(cell);
+        colMap.set(j, cell);
+        col.push(cell);
       }
-      newBoardMap.set(i, rowMap);
-      newBoard.push(row);
+      newBoardMap.set(i, colMap);
+      newBoard.push(col);
     }
     return [newBoard, newBoardMap];
   }
@@ -72,37 +75,14 @@ export class GameComponent {
   randomizeBoard() {
     this.resetGame();
     const boundary = Math.random() * (0.95 - 0.7) + 0.7;
-    this.board.forEach((row) => {
-      row.forEach((cell) => {
+    this.board.forEach((col) => {
+      col.forEach((cell) => {
         if (Math.random() > boundary) {
           cell[0] = true;
           this.updateLivingCellCount();
         }
       });
     });
-  }
-
-  startGame(): void {
-    this.intervalId = window.setInterval(this.runGame, this.interval);
-    this.running = true;
-
-    // benchmarking
-    // console.log('living cells at start:', this.livingCells);
-    // console.time('game timer');
-  }
-
-  pauseGame(): void {
-    if (!this.intervalId) return;
-    window.clearInterval(this.intervalId);
-  }
-
-  stopGame(): void {
-    this.pauseGame();
-    this.running = false;
-
-    // benchmarking
-    // console.log('living cells at end:', this.livingCells);
-    // console.timeEnd('game timer');
   }
 
   resetGame() {
@@ -115,15 +95,20 @@ export class GameComponent {
   }
 
   runGame = () => {
+    console.log('Game running');
     this.iteration++;
     let newCellCount = 0;
     let gameOver = true;
-    const [boardClone, boardMapClone] = this.cloneBoard();
+    const [boardClone, boardMapClone] = this.cloneBoard<boolean>();
 
-    boardClone.forEach((row, i) => {
-      row.forEach((cell, j) => {
+    boardClone.forEach((col, i) => {
+      col.forEach((cell, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
-        const neighbors = this.getLiveNeighborCount(boardMapClone, i, j);
+        const neighbors = this.tallyNeighbors<boolean, number>(
+          boardMapClone as BoardMap,
+          i,
+          j
+        );
         if (cell[0]) {
           gameOver = false;
           if (neighbors < 2 || neighbors > 3) {
@@ -139,13 +124,12 @@ export class GameComponent {
         if (activeCell[0]) newCellCount++;
       });
     });
-
     if (gameOver || this.iteration === this.maxIterations) this.stopGame();
     this.updateLivingCellCount(newCellCount);
   };
 
-  flipCell(row: number, col: number) {
-    const cell = this.getCell(this.boardMap, row, col);
+  flipCell(col: number, row: number) {
+    const cell = this.getCell(this.boardMap, col, row);
 
     if (!cell) return;
 
@@ -156,30 +140,26 @@ export class GameComponent {
     else this.updateLivingCellCount(-1);
   }
 
-  getLiveNeighborCount(boardMap: BoardMap, row: number, col: number): number {
+  tallyNeighbors<T, R>(
+    boardMap: Map<number, Map<number, [T]>>,
+    row: number,
+    col: number
+  ): R {
     let liveNeighbors: number = 0;
-    for (let r = row - 1, rr = row + 1; r <= rr; r++) {
-      for (let c = col - 1, cc = col + 1; c <= cc; c++) {
+    for (let c = col - 1, cc = col + 1; c <= cc; c++) {
+      for (let r = row - 1, rr = row + 1; r <= rr; r++) {
         if (r === row && c === col) continue;
-        let thisRow = r;
         let thisColumn = c;
-        if (r < 0) thisRow = this.boardSize - 1;
-        if (r >= this.boardSize) thisRow = 0;
+        let thisRow = r;
         if (c < 0) thisColumn = this.boardSize - 1;
         if (c >= this.boardSize) thisColumn = 0;
+        if (r < 0) thisRow = this.boardSize - 1;
+        if (r >= this.boardSize) thisRow = 0;
         if (this.getCellValue(boardMap, thisRow, thisColumn)) liveNeighbors++;
       }
     }
 
-    return liveNeighbors;
-  }
-
-  getCell(board: BoardMap, row: number, col: number): [boolean] {
-    return board.get(row)?.get(col)!;
-  }
-
-  getCellValue(board: BoardMap, row: number, col: number): boolean {
-    return this.getCell(board, row, col)[0]!;
+    return liveNeighbors as R;
   }
 
   toggleColorMode() {
@@ -190,11 +170,11 @@ export class GameComponent {
     const boardSizeReference = this.boardSize / 2;
     const negativeSpace = LIFE.length;
     const min = boardSizeReference - negativeSpace / 2;
-    for (let row = 0; row < negativeSpace; row++) {
-      for (let col = 0; col < negativeSpace; col++) {
-        const cell = LIFE[col][row];
+    for (let col = 0; col < negativeSpace; col++) {
+      for (let row = 0; row < negativeSpace; row++) {
+        const cell = LIFE[row][col];
         if (cell) {
-          this.flipCell(row + min, col + min);
+          this.flipCell(col + min, row + min);
         }
       }
     }
@@ -219,60 +199,64 @@ export class GameComponent {
     return color;
   }
 
-  handleChangeBoardSize(size: number) {
-    this.boardSize = size;
-    this.cellSize = Math.round(840 / this.boardSize) + 'px';
-    this.resetGame();
-  }
-
-  handleChangeInterval(interval: number) {
-    this.interval = interval;
-    this.pauseGame();
-    this.startGame();
-  }
-
-  cloneBoard(): [[boolean][][], BoardMap] {
-    const clonedBoard: [boolean][][] = [];
-    const clonedBoardMap: BoardMap = new Map();
-    for (let i = 0; i < this.boardSize; i++) {
-      const row: [boolean][] = [];
-      const rowMap = new Map<number, [boolean]>();
-      for (let j = 0; j < this.boardSize; j++) {
-        const cell: [boolean] = [this.board[i][j][0]];
-        rowMap.set(j, cell);
-        row.push(cell);
-      }
-      clonedBoardMap.set(i, rowMap);
-      clonedBoard.push(row);
+  getCellPosition(event: MouseEvent): [number | null, number | null] {
+    const closestCol = (event.target as HTMLElement).closest('[data-col]');
+    const closestRow = (event.target as HTMLElement).closest('[data-row]');
+    if (!closestCol || !closestRow) return [null, null];
+    try {
+      const col = (closestCol?.attributes as NamedNodeMap)['data-col' as any]
+        ?.value;
+      const row = (closestRow?.attributes as NamedNodeMap)['data-row' as any]
+        ?.value;
+      if (row == null || col == null)
+        throw new Error(`Invalid cell position. ROW: ${row}, COL: ${col}`);
+      return [+col, +row];
+    } catch (err) {
+      console.error('Error getting cell position', err);
+      throw err;
     }
-    return [clonedBoard, clonedBoardMap];
   }
 
-  handleMouseOver(event: MouseEvent, row: number, col: number) {
-    const cellValue = this.getCellValue(this.boardMap, row, col);
+  handleMouseOver(event: MouseEvent) {
+    const [col, row] = this.getCellPosition(event);
+    if (col == null || row == null) return;
+    const cellValue = this.getCellValue(this.boardMap, col, row);
     const [hRow, hCol] = this.hoveredCell || [null, null];
     if (this.dragging && hRow !== row && hCol !== col) {
-      this.hoveredCell = [row, col];
+      this.hoveredCell = [col, row];
       if (
         (cellValue && this.dragBehavior === 'destroy') ||
         (!cellValue && this.dragBehavior === 'create')
       ) {
         event.target?.addEventListener('mouseleave', this.handleMouseLeave);
-        this.flipCell(row, col);
+        this.flipCell(col, row);
       }
     }
   }
 
   handleMouseLeave = () => (this.hoveredCell = null);
 
-  setDragging(desiredState: boolean, row?: number, col?: number) {
+  setDragging(event: MouseEvent, desiredState: boolean) {
+    event.preventDefault();
+    const [col, row] = this.getCellPosition(event);
     this.dragging = desiredState;
-    if (this.dragging && row != null && col != null) {
-      this.dragBehavior = this.getCellValue(this.boardMap, row, col)
+    if (this.dragging && col != null && row != null) {
+      this.dragBehavior = this.getCellValue(this.boardMap, col, row)
         ? 'destroy'
         : 'create';
-      this.hoveredCell = [row, col];
-      this.flipCell(row, col);
+      this.hoveredCell = [col, row];
+      this.flipCell(col, row);
+    }
+  }
+
+  getCellStyle(colIndex: number, rowIndex: number): string {
+    const cellValue = this.getCellValue(this.boardMap, colIndex, rowIndex);
+    if (!cellValue) {
+      return 'var(--light)';
+    } else if (this.colorMode) {
+      return this.currentColor;
+    } else {
+      return 'var(--dark)';
     }
   }
 }

@@ -1,4 +1,6 @@
 <div class="details">
   <span>Iteration: {{ this.iteration.toString().padStart(6, "0") }}</span>
-  <span>Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span>
+  <span *ngIf="this.livingCells != null">
+    Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span
+  >
 </div>
