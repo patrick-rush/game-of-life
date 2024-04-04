@@ -70,16 +70,16 @@ export class RpsComponent extends BaseGameComponent {
     const newBoard: [CellState][][] = [];
     const newBoardMap: BoardMap = new Map();
     for (let i = 0; i < this.boardSize; i++) {
-      const row: [CellState][] = [];
-      const rowMap = new Map<number, [CellState]>();
+      const col: [CellState][] = [];
+      const colMap = new Map<number, [CellState]>();
       for (let j = 0; j < this.boardSize; j++) {
         const random = Math.floor(Math.random() * 3);
         const cell: [CellState] = [random];
-        rowMap.set(j, cell);
-        row.push(cell);
+        colMap.set(j, cell);
+        col.push(cell);
       }
-      newBoardMap.set(i, rowMap);
-      newBoard.push(row);
+      newBoardMap.set(i, colMap);
+      newBoard.push(col);
     }
     return [newBoard, newBoardMap];
   }
@@ -93,14 +93,16 @@ export class RpsComponent extends BaseGameComponent {
   }
 
   runGame = () => {
+    if (this.activeGame !== 'rps') this.stopGame();
+    console.log('running');
     this.iteration++;
     let rock = 0;
     let paper = 0;
     let scissors = 0;
     const [boardClone, boardMapClone] = this.cloneBoard<CellState>();
 
-    boardClone.forEach((row, i) => {
-      row.forEach((_, j) => {
+    boardClone.forEach((col, i) => {
+      col.forEach((_, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
         const neighbors = this.tallyNeighbors<CellState, TallyNeighborsReturn>(
           boardMapClone,
@@ -130,15 +132,15 @@ export class RpsComponent extends BaseGameComponent {
 
   tallyNeighbors<T, R>(
     boardMap: Map<number, Map<number, [T]>>,
-    row: number,
-    col: number
+    col: number,
+    row: number
   ): R {
     let rock: number = 0;
     let paper: number = 0;
     let scissors: number = 0;
-    for (let r = row - 1, rr = row + 1; r <= rr; r++) {
-      for (let c = col - 1, cc = col + 1; c <= cc; c++) {
-        if (r === row && c === col) continue;
+    for (let r = col - 1, rr = col + 1; r <= rr; r++) {
+      for (let c = row - 1, cc = row + 1; c <= cc; c++) {
+        if (r === col && c === row) continue;
         let thisRow = r;
         let thisColumn = c;
         if (r < 0) thisRow = this.boardSize - 1;

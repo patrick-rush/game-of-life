@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { DefaultsService } from '../defaults.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-base-game',
@@ -10,6 +11,7 @@ import { DefaultsService } from '../defaults.service';
 })
 export abstract class BaseGameComponent {
   protected intervalId: number | null = null;
+  activeGame: string;
   interval: number;
   boardSize: number;
 
@@ -25,6 +27,8 @@ export abstract class BaseGameComponent {
 
   running: boolean = false;
 
+  subscription: Subscription | null = null;
+
   // @ts-ignore
   constructor(@Inject(DefaultsService) protected defaults: DefaultsService) {
     this.boardSize = defaults.boardSize;
@@ -32,6 +36,17 @@ export abstract class BaseGameComponent {
     this.maxIterations = defaults.maxIterations;
     this.cellSizeDividend = defaults.cellSizeDividend;
     this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
+    this.activeGame = defaults.activeGame;
+  }
+
+  ngOnInit() {
+    this.subscription = this.defaults.defaultGame$.subscribe((game) => {
+      this.activeGame = game;
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 
   abstract generateBoard(): void;
@@ -61,24 +76,24 @@ export abstract class BaseGameComponent {
 
   abstract tallyNeighbors<T, R>(
     boardMap: Map<number, Map<number, [T]>>,
-    row: number,
-    col: number
+    col: number,
+    row: number
   ): R;
 
   getCell<T>(
     board: Map<number, Map<number, [T]>>,
-    row: number,
-    col: number
+    col: number,
+    row: number
   ): [T] {
-    return board.get(row)?.get(col)!;
+    return board.get(col)?.get(row)!;
   }
 
   getCellValue<T>(
     board: Map<number, Map<number, [T]>>,
-    row: number,
-    col: number
+    col: number,
+    row: number
   ): T {
-    return this.getCell(board, row, col)[0]!;
+    return this.getCell(board, col, row)[0]!;
   }
 
   handleChangeBoardSize(size: number) {
@@ -99,15 +114,15 @@ export abstract class BaseGameComponent {
     const clonedBoard: [T][][] = [];
     const clonedBoardMap: Map<number, Map<number, [T]>> = new Map();
     for (let i = 0; i < this.boardSize * widthMod; i++) {
-      const row: [T][] = [];
-      const rowMap = new Map<number, [T]>();
+      const col: [T][] = [];
+      const colMap = new Map<number, [T]>();
       for (let j = 0; j < this.boardSize; j++) {
         const cell: [T] = [this.board[i][j][0]] as [T];
-        rowMap.set(j, cell);
-        row.push(cell);
+        colMap.set(j, cell);
+        col.push(cell);
       }
-      clonedBoardMap.set(i, rowMap);
-      clonedBoard.push(row);
+      clonedBoardMap.set(i, colMap);
+      clonedBoard.push(col);
     }
     return [clonedBoard, clonedBoardMap];
   }

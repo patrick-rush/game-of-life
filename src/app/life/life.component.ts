@@ -57,15 +57,15 @@ export class LifeComponent extends BaseGameComponent {
     const newBoard: [boolean][][] = [];
     const newBoardMap: BoardMap = new Map();
     for (let i = 0; i < this.boardSize; i++) {
-      const row: [boolean][] = [];
-      const rowMap = new Map<number, [boolean]>();
+      const col: [boolean][] = [];
+      const colMap = new Map<number, [boolean]>();
       for (let j = 0; j < this.boardSize; j++) {
         const cell: [boolean] = [false];
-        rowMap.set(j, cell);
-        row.push(cell);
+        colMap.set(j, cell);
+        col.push(cell);
       }
-      newBoardMap.set(i, rowMap);
-      newBoard.push(row);
+      newBoardMap.set(i, colMap);
+      newBoard.push(col);
     }
     return [newBoard, newBoardMap];
   }
@@ -73,8 +73,8 @@ export class LifeComponent extends BaseGameComponent {
   randomizeBoard() {
     this.resetGame();
     const boundary = Math.random() * (0.95 - 0.7) + 0.7;
-    this.board.forEach((row) => {
-      row.forEach((cell) => {
+    this.board.forEach((col) => {
+      col.forEach((cell) => {
         if (Math.random() > boundary) {
           cell[0] = true;
           this.updateLivingCellCount();
@@ -93,13 +93,15 @@ export class LifeComponent extends BaseGameComponent {
   }
 
   runGame = () => {
+    if (this.activeGame !== 'life') this.stopGame();
+    console.log('running');
     this.iteration++;
     let newCellCount = 0;
     let gameOver = true;
     const [boardClone, boardMapClone] = this.cloneBoard<boolean>();
 
-    boardClone.forEach((row, i) => {
-      row.forEach((cell, j) => {
+    boardClone.forEach((col, i) => {
+      col.forEach((cell, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
         const neighbors = this.tallyNeighbors<boolean, number>(
           boardMapClone as BoardMap,
@@ -121,13 +123,13 @@ export class LifeComponent extends BaseGameComponent {
         if (activeCell[0]) newCellCount++;
       });
     });
-
+    if (gameOver) console.log('gameOver', gameOver);
     if (gameOver || this.iteration === this.maxIterations) this.stopGame();
     this.updateLivingCellCount(newCellCount);
   };
 
-  flipCell(row: number, col: number) {
-    const cell = this.getCell(this.boardMap, row, col);
+  flipCell(col: number, row: number) {
+    const cell = this.getCell(this.boardMap, col, row);
 
     if (!cell) return;
 
@@ -144,15 +146,15 @@ export class LifeComponent extends BaseGameComponent {
     col: number
   ): R {
     let liveNeighbors: number = 0;
-    for (let r = row - 1, rr = row + 1; r <= rr; r++) {
-      for (let c = col - 1, cc = col + 1; c <= cc; c++) {
+    for (let c = col - 1, cc = col + 1; c <= cc; c++) {
+      for (let r = row - 1, rr = row + 1; r <= rr; r++) {
         if (r === row && c === col) continue;
-        let thisRow = r;
         let thisColumn = c;
-        if (r < 0) thisRow = this.boardSize - 1;
-        if (r >= this.boardSize) thisRow = 0;
+        let thisRow = r;
         if (c < 0) thisColumn = this.boardSize - 1;
         if (c >= this.boardSize) thisColumn = 0;
+        if (r < 0) thisRow = this.boardSize - 1;
+        if (r >= this.boardSize) thisRow = 0;
         if (this.getCellValue(boardMap, thisRow, thisColumn)) liveNeighbors++;
       }
     }
@@ -168,11 +170,11 @@ export class LifeComponent extends BaseGameComponent {
     const boardSizeReference = this.boardSize / 2;
     const negativeSpace = LIFE.length;
     const min = boardSizeReference - negativeSpace / 2;
-    for (let row = 0; row < negativeSpace; row++) {
-      for (let col = 0; col < negativeSpace; col++) {
-        const cell = LIFE[col][row];
+    for (let col = 0; col < negativeSpace; col++) {
+      for (let row = 0; row < negativeSpace; row++) {
+        const cell = LIFE[row][col];
         if (cell) {
-          this.flipCell(row + min, col + min);
+          this.flipCell(col + min, row + min);
         }
       }
     }
@@ -197,31 +199,53 @@ export class LifeComponent extends BaseGameComponent {
     return color;
   }
 
-  handleMouseOver(event: MouseEvent, row: number, col: number) {
-    const cellValue = this.getCellValue(this.boardMap, row, col);
+  getCellPosition(event: MouseEvent): [number | null, number | null] {
+    const closestCol = (event.target as HTMLElement).closest('[data-col]');
+    const closestRow = (event.target as HTMLElement).closest('[data-row]');
+    if (!closestCol || !closestRow) return [null, null];
+    try {
+      const col = (closestCol?.attributes as NamedNodeMap)['data-col' as any]
+        ?.value;
+      const row = (closestRow?.attributes as NamedNodeMap)['data-row' as any]
+        ?.value;
+      if (row == null || col == null)
+        throw new Error(`Invalid cell position. ROW: ${row}, COL: ${col}`);
+      return [+col, +row];
+    } catch (err) {
+      console.error('Error getting cell position', err);
+      throw err;
+    }
+  }
+
+  handleMouseOver(event: MouseEvent) {
+    const [col, row] = this.getCellPosition(event);
+    if (col == null || row == null) return;
+    const cellValue = this.getCellValue(this.boardMap, col, row);
     const [hRow, hCol] = this.hoveredCell || [null, null];
     if (this.dragging && hRow !== row && hCol !== col) {
-      this.hoveredCell = [row, col];
+      this.hoveredCell = [col, row];
       if (
         (cellValue && this.dragBehavior === 'destroy') ||
         (!cellValue && this.dragBehavior === 'create')
       ) {
         event.target?.addEventListener('mouseleave', this.handleMouseLeave);
-        this.flipCell(row, col);
+        this.flipCell(col, row);
       }
     }
   }
 
   handleMouseLeave = () => (this.hoveredCell = null);
 
-  setDragging(desiredState: boolean, row?: number, col?: number) {
+  setDragging(event: MouseEvent, desiredState: boolean) {
+    event.preventDefault();
+    const [col, row] = this.getCellPosition(event);
     this.dragging = desiredState;
-    if (this.dragging && row != null && col != null) {
-      this.dragBehavior = this.getCellValue(this.boardMap, row, col)
+    if (this.dragging && col != null && row != null) {
+      this.dragBehavior = this.getCellValue(this.boardMap, col, row)
         ? 'destroy'
         : 'create';
-      this.hoveredCell = [row, col];
-      this.flipCell(row, col);
+      this.hoveredCell = [col, row];
+      this.flipCell(col, row);
     }
   }
 }
