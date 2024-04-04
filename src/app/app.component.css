@@ -64,6 +64,24 @@
   }
 }
 
+@media (min-height: 875px) {
+  .game {
+    display: fixed;
+  }
+  .mobile-message {
+    display: none;
+  }
+}
+
+@media (max-height: 875px) {
+  .game {
+    display: none;
+  }
+  .mobile-message {
+    display: flex;
+  }
+}
+
 @media (max-width: 400px) {
   .mobile-message {
     padding: 1rem;
