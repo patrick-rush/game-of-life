@@ -15,7 +15,7 @@
   min-width: 60rem;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100%;
   background-color: var(--dark);
 }
 
@@ -38,7 +38,7 @@
 }
 
 .content {
-  min-width: 56rem;
+  min-width: 55rem;
 }
 
 .game-toggle {
@@ -64,7 +64,7 @@
   }
 }
 
-@media (min-height: 875px) {
+@media (min-height: 200px) {
   .game {
     display: fixed;
   }
@@ -73,7 +73,7 @@
   }
 }
 
-@media (max-height: 875px) {
+@media (max-height: 200px) {
   .game {
     display: none;
   }
