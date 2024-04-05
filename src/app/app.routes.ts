@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LifeComponent } from './life/life.component';
 import { RpsComponent } from './rps/rps.component';
+import { AntComponent } from './ant/ant.component';
 import { RedirectComponent } from './redirect/redirect.component';
 
 export const routes: Routes = [
@@ -9,5 +10,6 @@ export const routes: Routes = [
   { path: 'rps', redirectTo: 'rock-paper-scissors', pathMatch: 'full' },
   { path: 'game-of-life', component: LifeComponent },
   { path: 'rock-paper-scissors', component: RpsComponent },
+  { path: 'ant', component: AntComponent },
   { path: '**', component: RedirectComponent },
 ];

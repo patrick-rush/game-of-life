@@ -1,0 +1,53 @@
+:host {
+    --black: #101010;
+    --white: #ffffff;
+    --gray: #3f3f3f;
+  
+    --dark: var(--black);
+    --light: var(--white);
+    --medium: var(--gray);
+  }
+  
+  .game {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+  }
+  
+  .header {
+    width: 100%;
+  }
+  
+  .board {
+    display: flex;
+    width: auto;
+    height: auto;
+  }
+  
+  ul {
+    margin-block-end: 0%;
+    margin-block-start: 0%;
+    padding: 0;
+  }
+  
+  li {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .row {
+    width: auto;
+    padding: 0;
+  }
+  
+  .cell {
+    width: 14px;
+    height: 14px;
+    background-color: var(--dark);
+    /* border: 1px solid var(--medium) ; */
+    border-radius: 100%;
+  }
+  
