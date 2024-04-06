@@ -19,7 +19,7 @@ type Cell = {
   degreeTurn: Turn;
 };
 
-enum Turn {
+export enum Turn {
   NONE,
   RIGHT,
   AROUND,
@@ -120,6 +120,9 @@ export class AntComponent extends BaseGameComponent {
   override interval;
 
   ant: Ant;
+  colorSequence: number[];
+  turnSequence: Turn[];
+  untouchedCellBehavior: Turn = Turn.LEFT;
 
   constructor(
     @Inject(DefaultsService) protected override defaults: DefaultsService
@@ -130,9 +133,14 @@ export class AntComponent extends BaseGameComponent {
 
     const randomCol = Math.floor(Math.random() * this.boardSize);
     const randomRow = Math.floor(Math.random() * this.boardSize);
+    const sequenceLength = Math.ceil(Math.random() * 10);
+    this.colorSequence = Array.from(
+      { length: sequenceLength },
+      () => Math.floor(Math.random() * 10) % sequenceLength
+    );
 
     this.ant = {
-      colorSequence: [0, 1, 2],
+      colorSequence: this.colorSequence,
       sequenceIndex: 0,
       coordinates: [randomCol, randomRow],
       facing: Facing.UP,
@@ -140,29 +148,26 @@ export class AntComponent extends BaseGameComponent {
 
     this.colorMap.set(-1, {
       color: 'var(--dark)',
-      degreeTurn: Turn.RIGHT,
+      degreeTurn: this.untouchedCellBehavior,
     });
-    this.colorMap.set(0, {
-      color: this.genRanHex(6),
-      degreeTurn: Turn.LEFT,
-    });
-    this.colorMap.set(1, {
-      color: this.genRanHex(6),
-      degreeTurn: Turn.RIGHT,
-    });
-    this.colorMap.set(2, {
-      color: this.genRanHex(6),
-      degreeTurn: Turn.LEFT,
-    });
+
+    for (let i = 0; i <= Math.max(...this.colorSequence); i++) {
+      const turnOptions = [Turn.NONE, Turn.RIGHT, Turn.AROUND, Turn.LEFT];
+      this.colorMap.set(i, {
+        color: this.genRanHex(6),
+        degreeTurn: Math.floor(Math.random() * turnOptions.length),
+      });
+    }
+
+    this.turnSequence = this.colorSequence.map(
+      (color) => this.colorMap.get(color)!.degreeTurn
+    );
 
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
     this.interval = 200;
 
-    // this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
-
-    // const [rockColor, paperColor, scissorsColor] = this.toggleColorMode();
     // this.writeName();
   }
 
@@ -174,13 +179,9 @@ export class AntComponent extends BaseGameComponent {
       const col: [Cell][] = [];
       const colMap = new Map<number, [Cell]>();
       for (let j = 0; j < this.boardSize; j++) {
-        let cell: Cell = {
-          color: this.colorMap.get(-1)!.color,
-          degreeTurn: 1,
-        };
+        let cell = this.colorMap.get(-1)!;
         if (i === antCol && j === antRow) {
-          cell.color = this.colorMap.get(0)!.color;
-          cell.degreeTurn = 1;
+          cell = this.colorMap.get(0)!;
         }
         colMap.set(j, [cell]);
         col.push([cell]);
@@ -188,55 +189,53 @@ export class AntComponent extends BaseGameComponent {
       newBoardMap.set(i, colMap);
       newBoard.push(col);
     }
-    console.log('Generated board:', { newBoard, newBoardMap });
+    // console.log('Generated board:', { newBoard, newBoardMap });
     return [newBoard, newBoardMap];
   }
 
   move() {
-    console.log('Moving ant');
+    // console.log('Moving ant');
 
     // get the location of the ant
     const [col, row] = this.ant.coordinates;
 
     // get the information about the cell that the ant is on
     const cell = this.getCellValue(this.boardMap, col, row);
-    console.log('Cell:', cell);
+    // console.log('Cell:', cell);
     // extract the degree turn from the cell
     // this is the turn before proceeding to the next cell
-    const { degreeTurn } = cell;
+    let { degreeTurn } = cell;
+    if (cell.color === 'var(--dark)') degreeTurn = this.untouchedCellBehavior;
 
     // clone the cell so we can update it
-    const cellClone: Cell = { ...cell };
+    let cellClone: Cell = { ...cell };
+
+    // update the color of the cloned cell
+    cellClone = this.colorMap.get(
+      this.ant.colorSequence[this.ant.sequenceIndex]
+    )!;
 
     // update the position in the sequence that the ant is on
     this.ant.sequenceIndex =
       (this.ant.sequenceIndex + 1) % this.ant.colorSequence.length;
 
-    // update the color of the cloned cell
-    cellClone.color = this.colorMap.get(
-      this.ant.colorSequence[this.ant.sequenceIndex]
-    )!.color;
-    cellClone.degreeTurn = this.colorMap.get(
-      this.ant.colorSequence[this.ant.sequenceIndex]
-    )!.degreeTurn;
-
     // update the degree turn of the cloned cell
     // cellClone.degreeTurn = this.colorMap.get(cellClone.color)!;
 
     // update the ant's facing
-    console.log('Current facing:', this.ant.facing);
+    // console.log('Current facing:', this.ant.facing);
     const newFacing = this.turn(this.ant, degreeTurn);
     this.ant.facing = newFacing;
-    console.log('New facing:', newFacing);
+    // console.log('New facing:', newFacing);
 
     // move the ant one space according to its new facing
     const newCoordinates = this.determineNewLocation(this.ant);
-    console.log('Current location:', newCoordinates);
+    // console.log('Current location:', newCoordinates);
     this.ant.coordinates = newCoordinates;
 
     // update the board
     this.boardMap.get(col)!.set(row, [cellClone]);
-    console.log('Cell clone:', cellClone);
+    // console.log('Cell clone:', cellClone);
 
     // we have to get the turn degree associated with the color that the ant is on
     // cellClone.degreeTurn = this.colorMap.get(cellClone.color)!;
@@ -247,9 +246,18 @@ export class AntComponent extends BaseGameComponent {
     return newFacing;
   }
 
+  // turn(ant: Ant, turn: Turn): Facing {
+  //   // const newFacing = (ant.facing + turn) % 4;
+  //   const newFacing =
+  //     turn === Turn.RIGHT
+  //       ? (ant.facing = (ant.facing + 1) % 4)
+  //       : (ant.facing = (ant.facing + 3) % 4);
+  //   return newFacing;
+  // }
+
   determineNewLocation(ant: Ant): [number, number] {
     const [col, row] = ant.coordinates;
-    console.log('determineNewLocation:', { col, row });
+    // console.log('determineNewLocation:', { col, row });
 
     switch (ant.facing) {
       case Facing.UP:
@@ -272,10 +280,16 @@ export class AntComponent extends BaseGameComponent {
     this.iteration = 0;
     this.board = newBoard;
     this.boardMap = newBoardMap;
+    this.ant = {
+      colorSequence: this.colorSequence,
+      sequenceIndex: 0,
+      coordinates: this.ant.coordinates,
+      facing: Facing.UP,
+    };
   }
 
   runGame = () => {
-    console.log('Game running');
+    // console.log('Game running');
     this.iteration++;
     this.move();
   };
@@ -286,35 +300,6 @@ export class AntComponent extends BaseGameComponent {
     row: number
   ): R {
     return this.logUnused() as R;
-    for (let r = col - 1, rr = col + 1; r <= rr; r++) {
-      for (let c = row - 1, cc = row + 1; c <= cc; c++) {
-        if (r === col && c === row) continue;
-        let thisRow = r;
-        let thisColumn = c;
-        if (r < 0) thisRow = this.boardSize - 1;
-        if (r >= this.boardSize) thisRow = 0;
-        if (c < 0) thisColumn = this.boardSize - 1;
-        if (c >= this.boardSize) thisColumn = 0;
-        const cellValue = this.getCellValue<T>(boardMap, thisRow, thisColumn);
-        // switch (cellValue) {
-        //   case number.ROCK:
-        //     rock++;
-        //     break;
-        //   case number.PAPER:
-        //     paper++;
-        //     break;
-        //   case number.SCISSORS:
-        //     scissors++;
-        //     break;
-        // }
-      }
-    }
-
-    return {
-      // [number.ROCK]: rock,
-      // [number.PAPER]: paper,
-      // [number.SCISSORS]: scissors,
-    } as R;
   }
 
   genRanHex = (size: number) =>
@@ -322,14 +307,12 @@ export class AntComponent extends BaseGameComponent {
       .map(() => Math.floor(Math.random() * 16).toString(16))
       .join('');
 
-  // toggleColorMode(): [string, string, string] {
-
-  //   this.rockColor = '#' + genRanHex(6);
-  //   this.paperColor = '#' + genRanHex(6);
-  //   this.scissorsColor = '#' + genRanHex(6);
-  //   this.colorMode = !this.colorMode;
-  //   return [this.rockColor, this.paperColor, this.scissorsColor];
-  // }
+  toggleColorMode() {
+    for (const [key, value] of this.colorMap) {
+      if (key === -1) continue;
+      value.color = this.genRanHex(6);
+    }
+  }
 
   // writeName() {
   //   return this.logUnused();
@@ -358,19 +341,18 @@ export class AntComponent extends BaseGameComponent {
     return `#${color}`;
   }
 
-  // getCellStyle(col: number, row: number): string {
-  //   const cell = this.getCellValue(this.boardMap, col, row);
-  // switch (cell) {
-  //   case number.ROCK:
-  //     return this.rockColor;
-  //   case number.PAPER:
-  //     return this.paperColor;
-  //   case number.SCISSORS:
-  //     return this.scissorsColor;
-  // }
-  // }
-
   logUnused() {
-    console.log('Unused');
+    // console.log('Unused');
+  }
+
+  toggleUntouchedCellBehavior(): void {
+    this.untouchedCellBehavior =
+      (this.untouchedCellBehavior + 1) %
+      Object.keys(Turn).filter((key) => isNaN(Number(key))).length;
+    this.colorMap.set(-1, {
+      color: 'var(--dark)',
+      degreeTurn: this.untouchedCellBehavior,
+    });
+    console.log('Untouched cell behavior:', this.untouchedCellBehavior);
   }
 }

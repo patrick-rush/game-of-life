@@ -5,14 +5,16 @@
       [boardSize]="boardSize"
       [interval]="interval"
       [running]="running"
+      [untouchedCellBehavior]="untouchedCellBehavior"
       (boardSizeChangeEvent)="handleChangeBoardSize($event)"
       (intervalChangeEvent)="handleChangeInterval($event)"
-      (toggleColorModeEvent)="logUnused()"
+      (toggleColorModeEvent)="toggleColorMode()"
       (startGamePlayEvent)="startGame()"
       (stopGamePlayEvent)="stopGame()"
       (resetGamePlayEvent)="resetGame()"
+      (toggleUntouchedCellBehaviorEvent)="toggleUntouchedCellBehavior()"
     />
-    <app-details [iteration]="iteration" />
+    <app-details [iteration]="iteration" [turnSequence]="turnSequence" />
   </div>
   <div>
     <div class="board">

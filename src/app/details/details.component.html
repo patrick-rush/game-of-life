@@ -3,4 +3,7 @@
   <span *ngIf="this.livingCells != null">
     Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span
   >
+  <span *ngIf="turnSequence != null">
+    Turn Sequence: {{ this.castedTurnSequence }}
+  </span>
 </div>

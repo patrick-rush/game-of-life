@@ -22,6 +22,19 @@
     </button>
     } } @else {
     <button (click)="handleToggleColorMode()">New Colors</button>
+    } @if (untouchedCellBehavior != null) {
+    <button
+      class="pill"
+      (click)="handleToggleUntouchedCellBehavior($event)"
+      title="Which way should the ant turn if it hits a blank cell? Current Value: {{
+        TURN[untouchedCellBehavior]
+      }}"
+    >
+      <div for="default" aria-hidden="false">Default</div>
+      <div>
+        {{ TURN[untouchedCellBehavior].substring(0, 1) }}
+      </div>
+    </button>
     }
     <div class="pill">
       <label for="boardSize" aria-hidden="false">Size</label>

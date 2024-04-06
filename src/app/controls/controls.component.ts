@@ -5,6 +5,13 @@ import { DefaultsService } from '../defaults.service';
 import { Game } from '../defaults.service';
 import { Router } from '@angular/router';
 
+export enum Turn {
+  NONE,
+  RIGHT,
+  AROUND,
+  LEFT,
+}
+
 @Component({
   selector: 'app-controls',
   standalone: true,
@@ -19,6 +26,7 @@ export class ControlsComponent {
   @Input() colorMode?: boolean;
   @Input() currentColor?: string;
   @Input() running!: boolean;
+  @Input() untouchedCellBehavior?: Turn;
 
   @Output() boardSizeChangeEvent = new EventEmitter<number>();
   @Output() intervalChangeEvent = new EventEmitter<number>();
@@ -27,6 +35,7 @@ export class ControlsComponent {
   @Output() stopGamePlayEvent = new EventEmitter<void>();
   @Output() resetGamePlayEvent = new EventEmitter<void>();
   @Output() randomizeBoardEvent = new EventEmitter<void>();
+  @Output() toggleUntouchedCellBehaviorEvent = new EventEmitter<void>();
 
   colorButtonHovered: boolean = false;
   gameForm: FormGroup;
@@ -42,6 +51,8 @@ export class ControlsComponent {
   readonly intervalStep: number = 10;
 
   randomColor: string;
+
+  TURN = Turn;
 
   constructor(
     @Inject(DefaultsService) private defaults: DefaultsService,
@@ -113,6 +124,11 @@ export class ControlsComponent {
     console.log(this.activeGame);
     this.activeGame = this.activeGame === Game.LIFE ? Game.RPS : Game.LIFE;
     this.router.navigate([this.activeGame]);
+  }
+
+  handleToggleUntouchedCellBehavior(event: MouseEvent) {
+    event.preventDefault();
+    this.toggleUntouchedCellBehaviorEvent.emit();
   }
 
   enforceValidNumber(
