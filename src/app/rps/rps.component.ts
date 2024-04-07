@@ -6,18 +6,13 @@ import { DetailsComponent } from '../details/details.component';
 import { DefaultsService, Game } from '../defaults.service';
 import { BaseGameComponent } from '../base-game/base-game.component';
 import { RPS } from '../../constants';
+import { type TallyCallback } from '../base-game/base-game.component';
 
 enum CellState {
   ROCK,
   PAPER,
   SCISSORS,
 }
-
-type TallyNeighborsReturn = {
-  [CellState.ROCK]: number;
-  [CellState.PAPER]: number;
-  [CellState.SCISSORS]: number;
-};
 
 type BoardMap = Map<number, Map<number, [CellState]>>;
 
@@ -48,9 +43,19 @@ export class RpsComponent extends BaseGameComponent {
   paperColor: string;
   scissorsColor: string;
 
-  rockCount: number = 0;
-  paperCount: number = 0;
-  scissorsCount: number = 0;
+  rockPaperScissorsTally: TallyCallback<CellState> = (cellValue, tallies) => {
+    switch (cellValue) {
+      case CellState.ROCK:
+        tallies[CellState.ROCK]++;
+        break;
+      case CellState.PAPER:
+        tallies[CellState.PAPER]++;
+        break;
+      case CellState.SCISSORS:
+        tallies[CellState.SCISSORS]++;
+        break;
+    }
+  };
 
   constructor(
     @Inject(DefaultsService) protected override defaults: DefaultsService
@@ -60,8 +65,10 @@ export class RpsComponent extends BaseGameComponent {
     const [newBoard, newBoardMap] = this.generateBoard();
     this.board = newBoard;
     this.boardMap = newBoardMap;
-    this.cellSize = this.cellSizeDividend / this.boardSize + 'px';
-
+    this.cellSize = this.calculateCellSize(
+      this.cellSizeDividend,
+      this.boardSize
+    );
     const [rockColor, paperColor, scissorsColor] = this.toggleColorMode();
     this.rockColor = rockColor;
     this.paperColor = paperColor;
@@ -99,18 +106,17 @@ export class RpsComponent extends BaseGameComponent {
   runGame = () => {
     console.log('Game running');
     this.iteration++;
-    let rock = 0;
-    let paper = 0;
-    let scissors = 0;
     const [boardClone, boardMapClone] = this.cloneBoard<CellState>();
 
     boardClone.forEach((col, i) => {
       col.forEach((_, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
-        const neighbors = this.tallyNeighbors<CellState, TallyNeighborsReturn>(
+        const neighbors = this.tallyNeighbors<CellState>(
           boardMapClone,
           i,
-          j
+          j,
+          this.rockPaperScissorsTally,
+          { [CellState.ROCK]: 0, [CellState.PAPER]: 0, [CellState.SCISSORS]: 0 }
         );
         if (activeCell[0] === CellState.ROCK && neighbors[CellState.PAPER] >= 3)
           activeCell[0] = CellState.PAPER;
@@ -126,51 +132,9 @@ export class RpsComponent extends BaseGameComponent {
           activeCell[0] = CellState.ROCK;
       });
     });
-    this.rockCount = rock;
-    this.paperCount = paper;
-    this.scissorsCount = scissors;
 
     if (this.iteration >= this.maxIterations) this.stopGame();
   };
-
-  tallyNeighbors<T, R>(
-    boardMap: Map<number, Map<number, [T]>>,
-    col: number,
-    row: number
-  ): R {
-    let rock: number = 0;
-    let paper: number = 0;
-    let scissors: number = 0;
-    for (let r = col - 1, rr = col + 1; r <= rr; r++) {
-      for (let c = row - 1, cc = row + 1; c <= cc; c++) {
-        if (r === col && c === row) continue;
-        let thisRow = r;
-        let thisColumn = c;
-        if (r < 0) thisRow = this.boardSize - 1;
-        if (r >= this.boardSize) thisRow = 0;
-        if (c < 0) thisColumn = this.boardSize - 1;
-        if (c >= this.boardSize) thisColumn = 0;
-        const cellValue = this.getCellValue<T>(boardMap, thisRow, thisColumn);
-        switch (cellValue) {
-          case CellState.ROCK:
-            rock++;
-            break;
-          case CellState.PAPER:
-            paper++;
-            break;
-          case CellState.SCISSORS:
-            scissors++;
-            break;
-        }
-      }
-    }
-
-    return {
-      [CellState.ROCK]: rock,
-      [CellState.PAPER]: paper,
-      [CellState.SCISSORS]: scissors,
-    } as R;
-  }
 
   toggleColorMode(): [string, string, string] {
     const genRanHex = (size: number) =>

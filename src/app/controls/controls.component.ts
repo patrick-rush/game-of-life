@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output, Inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgStyle } from '@angular/common';
-import { DefaultsService } from '../defaults.service';
 import { Game } from '../defaults.service';
 import { Router } from '@angular/router';
 
@@ -27,6 +26,10 @@ export class ControlsComponent {
   @Input() currentColor?: string;
   @Input() running!: boolean;
   @Input() untouchedCellBehavior?: Turn;
+  @Input() minBoardSize!: number;
+  @Input() maxBoardSize!: number;
+  @Input() minInterval!: number;
+  @Input() maxInterval!: number;
 
   @Output() boardSizeChangeEvent = new EventEmitter<number>();
   @Output() intervalChangeEvent = new EventEmitter<number>();
@@ -37,40 +40,28 @@ export class ControlsComponent {
   @Output() randomizeBoardEvent = new EventEmitter<void>();
   @Output() toggleUntouchedCellBehaviorEvent = new EventEmitter<void>();
 
+  readonly boardSizeStep: number = 2;
+  readonly intervalStep: number = 10;
+
   colorButtonHovered: boolean = false;
   gameForm: FormGroup;
-
-  defaultBoardSize: number;
-  minBoardSize: number;
-  maxBoardSize: number;
-  readonly boardSizeStep: number = 2;
-
-  defaultInterval: number;
-  minInterval: number;
-  maxInterval: number;
-  readonly intervalStep: number = 10;
 
   randomColor: string;
 
   TURN = Turn;
 
-  constructor(
-    @Inject(DefaultsService) private defaults: DefaultsService,
-    private router: Router
-  ) {
-    this.defaultBoardSize = defaults.boardSize;
-    this.defaultInterval = defaults.interval;
-    this.minBoardSize = defaults.minBoardSize;
-    this.maxBoardSize = defaults.maxBoardSize;
-    this.minInterval = defaults.minInterval;
-    this.maxInterval = defaults.maxInterval;
-
+  constructor(private router: Router) {
     this.gameForm = new FormGroup({
-      boardSize: new FormControl(this.defaultBoardSize),
-      interval: new FormControl(this.defaultInterval),
+      boardSize: new FormControl(this.boardSize),
+      interval: new FormControl(this.interval),
     });
 
     this.randomColor = this.genRanHex(6);
+  }
+
+  ngOnInit() {
+    this.gameForm.get('boardSize')?.setValue(this.boardSize);
+    this.gameForm.get('interval')?.setValue(this.interval);
   }
 
   handleFormSubmit() {
@@ -82,7 +73,7 @@ export class ControlsComponent {
   }
 
   handleBoardSizeChange(size: number) {
-    if (size === 0) this.boardSize = this.defaultBoardSize;
+    if (size === 0) this.boardSize = this.minBoardSize;
     this.boardSize = this.enforceValidNumber(
       size,
       this.minBoardSize,
@@ -90,10 +81,11 @@ export class ControlsComponent {
       this.boardSizeStep
     );
     this.boardSizeChangeEvent.emit(this.boardSize);
+    this.gameForm.get('boardSize')?.setValue(this.boardSize);
   }
 
   handleIntervalChange(interval: number) {
-    if (interval === 0) this.interval = this.defaultInterval;
+    if (interval === 0) this.interval = this.minInterval;
     this.interval = this.enforceValidNumber(
       interval,
       this.minInterval,
@@ -101,6 +93,7 @@ export class ControlsComponent {
       this.intervalStep
     );
     this.intervalChangeEvent.emit(this.interval);
+    this.gameForm.get('interval')?.setValue(this.interval);
   }
 
   handleToggleColorMode() {

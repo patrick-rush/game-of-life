@@ -7,6 +7,7 @@ import { DetailsComponent } from '../details/details.component';
 import { DefaultsService } from '../defaults.service';
 import { BaseGameComponent } from '../base-game/base-game.component';
 import { Game } from '../defaults.service';
+import { type TallyCallback } from '../base-game/base-game.component';
 
 type BoardMap = Map<number, Map<number, [boolean]>>;
 
@@ -41,6 +42,10 @@ export class LifeComponent extends BaseGameComponent {
   dragging: boolean = false;
   dragBehavior: 'create' | 'destroy' | null = null;
   hoveredCell: [number, number] | null = null;
+
+  liveNeighborsTally: TallyCallback<boolean> = (cellValue, tallies) => {
+    if (cellValue) tallies['liveNeighbors']++;
+  };
 
   constructor(
     private colorCell: ColorCellPipe,
@@ -104,20 +109,25 @@ export class LifeComponent extends BaseGameComponent {
     boardClone.forEach((col, i) => {
       col.forEach((cell, j) => {
         const activeCell = this.getCell(this.boardMap, i, j);
-        const neighbors = this.tallyNeighbors<boolean, number>(
+        const neighbors = this.tallyNeighbors<boolean>(
           boardMapClone as BoardMap,
           i,
-          j
+          j,
+          this.liveNeighborsTally,
+          { liveNeighbors: 0 }
         );
         if (cell[0]) {
           gameOver = false;
-          if (neighbors < 2 || neighbors > 3) {
+          if (
+            neighbors['liveNeighbors'] < 2 ||
+            neighbors['liveNeighbors'] > 3
+          ) {
             activeCell[0] = false;
           } else {
             activeCell[0] = true;
           }
         } else {
-          if (neighbors === 3) {
+          if (neighbors['liveNeighbors'] === 3) {
             activeCell[0] = true;
           }
         }
@@ -138,28 +148,6 @@ export class LifeComponent extends BaseGameComponent {
 
     if (newValue) this.updateLivingCellCount();
     else this.updateLivingCellCount(-1);
-  }
-
-  tallyNeighbors<T, R>(
-    boardMap: Map<number, Map<number, [T]>>,
-    row: number,
-    col: number
-  ): R {
-    let liveNeighbors: number = 0;
-    for (let c = col - 1, cc = col + 1; c <= cc; c++) {
-      for (let r = row - 1, rr = row + 1; r <= rr; r++) {
-        if (r === row && c === col) continue;
-        let thisColumn = c;
-        let thisRow = r;
-        if (c < 0) thisColumn = this.boardSize - 1;
-        if (c >= this.boardSize) thisColumn = 0;
-        if (r < 0) thisRow = this.boardSize - 1;
-        if (r >= this.boardSize) thisRow = 0;
-        if (this.getCellValue(boardMap, thisRow, thisColumn)) liveNeighbors++;
-      }
-    }
-
-    return liveNeighbors as R;
   }
 
   toggleColorMode() {
