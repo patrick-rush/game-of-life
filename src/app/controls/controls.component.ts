@@ -4,7 +4,7 @@ import { NgStyle } from '@angular/common';
 import { Game } from '../defaults.service';
 import { Router } from '@angular/router';
 
-export enum Turn {
+enum Turn {
   NONE,
   RIGHT,
   AROUND,
@@ -46,9 +46,10 @@ export class ControlsComponent {
   colorButtonHovered: boolean = false;
   gameForm: FormGroup;
 
-  randomColor: string;
+  randomColors: string[];
 
   TURN = Turn;
+  GAME = Game;
 
   constructor(private router: Router) {
     this.gameForm = new FormGroup({
@@ -56,7 +57,7 @@ export class ControlsComponent {
       interval: new FormControl(this.interval),
     });
 
-    this.randomColor = this.genRanHex(6);
+    this.randomColors = Array.from({ length: 4 }, () => this.genRanHex(6));
   }
 
   ngOnInit() {
@@ -113,10 +114,18 @@ export class ControlsComponent {
     this.randomizeBoardEvent.emit();
   }
 
-  toggleActiveGame() {
+  toggleActiveGame(game: Game) {
     console.log(this.activeGame);
-    this.activeGame = this.activeGame === Game.LIFE ? Game.RPS : Game.LIFE;
+    // this.activeGame = Game[([this.activeGame] + 1) % this.enumToIterable(Game).length] as keyof typeof Game;
+    this.activeGame = game;
     this.router.navigate([this.activeGame]);
+  }
+
+  enumToIterable<T>(enumObject: T): string[] {
+    if (typeof enumObject !== 'object' || enumObject === null) {
+      throw new Error('Invalid input');
+    }
+    return Object.keys(enumObject).filter((key) => isNaN(Number(key)));
   }
 
   handleToggleUntouchedCellBehavior(event: MouseEvent) {

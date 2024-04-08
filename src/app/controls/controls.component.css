@@ -67,8 +67,25 @@ button.game-toggle {
   border-radius: 100%;
 }
 
-.pill {
-  height: 38px;
+.ant {
+  background-color: var(--light);
+}
+
+.ant-body {
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+  background-color: var(--dark);
+}
+
+.button-pill {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.input-pill {
+  height: 39px;
   width: 9rem;
   display: flex;
   justify-content: space-around;
@@ -81,7 +98,6 @@ button.game-toggle {
 }
 
 label {
-  padding: 0 0.5rem;
   color: var(--dark);
 }
 
@@ -92,6 +108,14 @@ input {
   font-family: monospace;
   font-size: 16px;
   border: none;
+  outline: 1px dashed var(--dark);
+  border-radius: 5px;
+}
+
+input:focus {
+  outline: 1px solid var(--dark);
+  background: var(--dark);
+  color: var(--light);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

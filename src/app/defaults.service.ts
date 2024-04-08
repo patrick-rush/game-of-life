@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 export enum Game {
   LIFE = 'life',
   RPS = 'rps',
+  ANT = 'ant',
 }
 
 @Injectable({

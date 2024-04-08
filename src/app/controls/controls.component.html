@@ -24,7 +24,7 @@
     <button (click)="handleToggleColorMode()">New Colors</button>
     } @if (untouchedCellBehavior != null) {
     <button
-      class="pill"
+      class="button-pill"
       (click)="handleToggleUntouchedCellBehavior($event)"
       title="Which way should the ant turn if it hits a blank cell? Current Value: {{
         TURN[untouchedCellBehavior]
@@ -36,7 +36,7 @@
       </div>
     </button>
     }
-    <div class="pill">
+    <div class="input-pill">
       <label for="boardSize" aria-hidden="false">Size</label>
       <input
         type="number"
@@ -49,7 +49,7 @@
         title="Value from {{ minBoardSize }} to {{ maxBoardSize }}"
       />
     </div>
-    <div class="pill">
+    <div class="input-pill">
       <label for="interval" aria-hidden="false">Interval</label>
       <input
         type="number"
@@ -62,19 +62,46 @@
         title="Value from {{ minInterval }} to {{ maxInterval }}"
       />
     </div>
+    @if (activeGame !== 'life') {
     <button
       class="game-toggle"
-      (click)="toggleActiveGame()"
-      title="Switch Games"
+      (click)="toggleActiveGame(GAME.LIFE)"
+      title="Life"
     >
-      @if (activeGame === 'rps') {
       <div class="cell"></div>
-      } @else if (activeGame === 'life') {
+    </button>
+    } @if (activeGame !== 'rps') {
+    <button
+      class="game-toggle"
+      (click)="toggleActiveGame(GAME.RPS)"
+      title="Rock, Paper, Scissors"
+    >
       <div
         class="circle"
-        [ngStyle]="{ 'background-color': '#' + randomColor }"
+        [ngStyle]="{ 'background-color': '#' + randomColors[0] }"
       ></div>
-      }
     </button>
+    } @if (activeGame !== 'ant') {
+    <button
+      class="game-toggle"
+      (click)="toggleActiveGame(GAME.ANT)"
+      title="Ant"
+    >
+      <div class="ant">
+        <div
+          class="ant-body"
+          [ngStyle]="{ 'background-color': '#' + randomColors[1] }"
+        ></div>
+        <div
+          class="ant-body"
+          [ngStyle]="{ 'background-color': '#' + randomColors[2] }"
+        ></div>
+        <div
+          class="ant-body"
+          [ngStyle]="{ 'background-color': '#' + randomColors[3] }"
+        ></div>
+      </div>
+    </button>
+    }
   </form>
 </div>

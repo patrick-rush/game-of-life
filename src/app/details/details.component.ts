@@ -1,7 +1,7 @@
 import { CommonModule, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-export enum Turn {
+enum Turn {
   NONE,
   RIGHT,
   AROUND,
@@ -27,6 +27,5 @@ export class DetailsComponent {
         .map((turn) => Turn[turn].substring(0, 1))
         .join(', ');
     }
-    console.log('>>> in init', this.castedTurnSequence);
   }
 }

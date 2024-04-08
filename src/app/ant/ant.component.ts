@@ -53,7 +53,7 @@ type BoardMap = Map<number, Map<number, [Cell]>>;
 })
 export class AntComponent extends BaseGameComponent {
   protected override intervalId: number | null = null;
-  readonly activeGame: Game = Game.RPS;
+  readonly activeGame: Game = Game.ANT;
   colorMap: Map<
     number,
     {
@@ -172,8 +172,6 @@ export class AntComponent extends BaseGameComponent {
   }
 
   move() {
-    // console.log('Moving ant');
-
     // get ant location
     const [col, row] = this.ant.coordinates;
 
@@ -232,16 +230,16 @@ export class AntComponent extends BaseGameComponent {
   resetGame() {
     this.stopGame();
     this.nameShowing = false;
+    this.ant = {
+      colorSequence: this.colorSequence,
+      sequenceIndex: 0,
+      coordinates: this.placeAnt(),
+      facing: Facing.UP,
+    };
     const [newBoard, newBoardMap] = this.generateBoard();
     this.iteration = 0;
     this.board = newBoard;
     this.boardMap = newBoardMap;
-    this.ant = {
-      colorSequence: this.colorSequence,
-      sequenceIndex: 0,
-      coordinates: this.ant.coordinates,
-      facing: Facing.UP,
-    };
   }
 
   runGame = () => {
@@ -295,7 +293,6 @@ export class AntComponent extends BaseGameComponent {
       color: 'var(--dark)',
       degreeTurn: this.untouchedCellBehavior,
     });
-    console.log('Untouched cell behavior:', this.untouchedCellBehavior);
   }
 
   enumToIterable<T>(enumObject: T): string[] {
