@@ -9,5 +9,6 @@ export const routes: Routes = [
   { path: 'rps', redirectTo: 'rock-paper-scissors', pathMatch: 'full' },
   { path: 'game-of-life', component: LifeComponent },
   { path: 'rock-paper-scissors', component: RpsComponent },
-  { path: '**', component: RedirectComponent },
+  { path: '**', redirectTo: 'game-of-life', pathMatch: 'full' },
+  // { path: '**', component: RedirectComponent },
 ];
