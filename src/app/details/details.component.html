@@ -4,6 +4,23 @@
     Living Cells: {{ this.livingCells.toString().padStart(6, "0") }}</span
   >
   <span *ngIf="turnSequence != null">
-    Turn Sequence: {{ this.castedTurnSequence }}
+    <form
+      name="sequenceForm"
+      [formGroup]="sequenceForm"
+      (ngSubmit)="handleFormSubmit()"
+    >
+      <button class="submit" type="submit" hidden></button>
+
+      <div class="input-pill">
+        <label for="sequence" aria-hidden="false">Turns:</label>
+        <input
+          type="text"
+          id="sequence"
+          formControlName="sequence"
+          value="{{ this.castedTurnSequence }}"
+          title="Value from min to max"
+        />
+      </div>
+    </form>
   </span>
 </div>

@@ -18,7 +18,11 @@
       (resetGamePlayEvent)="resetGame()"
       (toggleUntouchedCellBehaviorEvent)="toggleUntouchedCellBehavior()"
     />
-    <app-details [iteration]="iteration" [turnSequence]="turnSequence" />
+    <app-details
+      [iteration]="iteration"
+      [turnSequence]="turnSequence"
+      (sequenceChangeEvent)="handleUpdateSequence($event)"
+    />
   </div>
   <div>
     <div class="board">

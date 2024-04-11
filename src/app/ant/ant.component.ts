@@ -8,7 +8,6 @@ import { BaseGameComponent } from '../base-game/base-game.component';
 import { ANT } from '../../constants';
 
 type Ant = {
-  colorSequence: number[];
   sequenceIndex: number;
   coordinates: [number, number];
   facing: Facing;
@@ -95,10 +94,10 @@ export class AntComponent extends BaseGameComponent {
       this.boardSize
     );
 
+    // if there is a turn sequence defined,
     this.colorSequence = this.generateColorSequence();
 
     this.ant = {
-      colorSequence: this.colorSequence,
       sequenceIndex: 0,
       coordinates: this.placeAnt(),
       facing: Facing.UP,
@@ -124,12 +123,20 @@ export class AntComponent extends BaseGameComponent {
   }
 
   generateColorSequence(): number[] {
-    const sequenceLength = Math.ceil(Math.random() * 10);
+    const sequenceLength =
+      this.turnSequence?.length || Math.ceil(Math.random() * 7);
     const colorSequence = Array.from(
       { length: sequenceLength },
       () => Math.floor(Math.random() * 10) % sequenceLength
     );
     return colorSequence;
+  }
+
+  handleUpdateSequence(sequence: Turn[]) {
+    console.log('Sequence before update:', this.turnSequence);
+    this.turnSequence = sequence;
+    this.colorSequence = this.generateColorSequence();
+    console.log('Sequence after update:', this.turnSequence);
   }
 
   placeAnt(): [number, number] {
@@ -186,13 +193,11 @@ export class AntComponent extends BaseGameComponent {
     let cellClone: Cell = { ...cell };
 
     // update cloned cell color
-    cellClone = this.colorMap.get(
-      this.ant.colorSequence[this.ant.sequenceIndex]
-    )!;
+    cellClone = this.colorMap.get(this.colorSequence[this.ant.sequenceIndex])!;
 
     // update ant's color sequence index
     this.ant.sequenceIndex =
-      (this.ant.sequenceIndex + 1) % this.ant.colorSequence.length;
+      (this.ant.sequenceIndex + 1) % this.colorSequence.length;
 
     // update ant's facing
     this.ant.facing = this.turn(this.ant, degreeTurn);
@@ -231,7 +236,6 @@ export class AntComponent extends BaseGameComponent {
     this.stopGame();
     this.nameShowing = false;
     this.ant = {
-      colorSequence: this.colorSequence,
       sequenceIndex: 0,
       coordinates: this.placeAnt(),
       facing: Facing.UP,

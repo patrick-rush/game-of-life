@@ -18,3 +18,38 @@
     margin: 0.5rem;
   }
 }
+
+label {
+  color: var(--dark);
+}
+
+.input-pill {
+  height: 39px;
+  width: 20rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-family: monospace;
+  font-size: 16px;
+  background-color: var(--light);
+  border: 1px solid var(--dark);
+  border-radius: 5px;
+}
+
+input {
+  text-align: center;
+  height: auto;
+  width: auto;
+  font-family: monospace;
+  font-size: 16px;
+  border: none;
+  outline: 1px dashed var(--dark);
+  border-radius: 5px;
+  text-transform:uppercase
+}
+
+input:focus {
+  outline: 1px solid var(--dark);
+  background: var(--dark);
+  color: var(--light);
+}
